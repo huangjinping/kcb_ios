@@ -1,0 +1,127 @@
+//
+//  CarDisplacementController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/7.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CarDisplacementController.h"
+#import "CarNkController.h"
+
+@interface CarDisplacementController ()
+
+@property (nonatomic, strong)NSMutableArray *nkArr;
+@property (nonatomic, strong)NSMutableArray *pqlist;
+
+@end
+
+@implementation CarDisplacementController
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"获取年款和排量"];
+}
+
+- (void)requestVIN{
+    NSString *seresId = [NSString stringWithFormat:@"%@",_seriesId];
+    if ([seresId isLegal] && ![seresId isEqualToString:@"(null)"]) {
+        [self requestData];
+        return ;
+    }
+    if ([_car.clsbdh isLegal]) {
+        [UITools showIndicatorToView:self.view];
+        [[NetworkEngine sharedNetwork] postBody:@{@"vin":[_car.clsbdh substringToIndex:8]} apiPath:kVINCarMessageURL hasHeader:NO finish:^(ResultState state, id resObj) {
+            [UITools hideHUDForView:self.view];
+            if (state == StateSucceed) {
+                if (![[resObj[@"body"][0][@"carserieslist"] analysisConvertToArray] count]) {
+                    [UITools alertWithMsg:[NSString stringWithFormat:@"您的%@匹配不到相关车型信息",_car.clpp1]];
+                    [self.navigationController popViewControllerAnimated:YES];
+                    
+                    return ;
+                }
+                self.car.seriesId = [NSString stringWithFormat:@"%@",resObj[@"body"][0][@"carserieslist"][0][@"id"]];
+                self.car.clpp1 = resObj[@"body"][0][@"carserieslist"][0][@"mbBrand"][@"brandName"];
+                self.car.line = resObj[@"body"][0][@"carserieslist"][0][@"carSeriesName"];
+                _seriesId = self.car.seriesId;
+                
+                [self requestData];
+            }
+        } failed:^(NSError *error) {
+            [UITools hideHUDForView:self.view];
+        }];
+    }else{
+        [self requestData];
+    }
+    
+}
+
+
+- (void)viewDidLoad{
+    [super viewDidLoad];
+    self.tableView.tableFooterView = [UIView new];
+    [self requestVIN];
+    
+    _nkArr = [@[] mutableCopy];
+    _pqlist = [@[] mutableCopy];
+}
+
+- (void)requestData{
+    [UITools showIndicatorToView:self.view];
+    [[NetworkEngine sharedNetwork] postBody:@{@"seriesID":_seriesId} apiPath:kCarGetGroupURL hasHeader:NO finish:^(ResultState state, id resObj) {
+        [UITools hideHUDForView:self.view];
+        [self.tableView.header endRefreshing];
+        if (state == StateSucceed) {
+            [_nkArr addObjectsFromArray:resObj[@"body"][0][@"nklist"]];
+            [_pqlist addObjectsFromArray:resObj[@"body"][0][@"pqllist"]];
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        [UITools hideHUDForView:self.view];
+        [self.tableView.header endRefreshing];
+    }];;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 1;
+}
+
+- (void)configCell:(UITableViewCell *)cell indexPath:(NSIndexPath *)index{
+    cell.textLabel.text = _pqlist[index.row][@"value"];
+    cell.textLabel.font = V3_36PX_FONT;
+    cell.textLabel.textColor = [UIColor colorWithHex:0x666666];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+  
+    return _pqlist.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 44;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, tableView.width, 44)];
+    l.text = @"请选择排气量";
+    
+    return l;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    CarNkController *cvc = [[CarNkController alloc]init];
+    cvc.needHome = self.needHome;
+    cvc.saveCarInfo = self.saveCarInfo;
+    cvc.icon = self.icon;
+    cvc.seriesId = self.seriesId;
+    cvc.car = self.car;
+    cvc.level = _level;
+    cvc.clpp1 = _clpp1;
+    cvc.dataSource = _nkArr;
+    cvc.seriesId = self.seriesId;
+    cvc.line = self.line;
+    cvc.pqlvalue = _pqlist[indexPath.row][@"value"];
+    [self.navigationController pushViewController:cvc animated:YES];
+}
+
+@end

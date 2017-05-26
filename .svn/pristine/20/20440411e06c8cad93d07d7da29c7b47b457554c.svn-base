@@ -1,0 +1,103 @@
+//
+//  ABBCalendarView.h
+//  ABBMockup
+//
+//  Created by Ive on 10/16/13.
+//  Copyright (c) 2013 com.bbtree. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+//#import "ABBDateInputView.h"
+
+//----------------------------------------------------------------------
+//calendar color
+//----------------------------------------------------------------------
+
+// hours = 0
+#define CALENDAR_DATE_COLOR_0                [UIColor whiteColor]
+#define CALENDAR_DATE_COLOR_0_bg             [UIColor darkGrayColor]
+// hours < 8
+#define CALENDAR_DATE_COLOR_L8               [UIColor lightGrayColor]
+// hours = 8
+#define CALENDAR_DATE_COLOR_E8               [UIColor colorWithRed:0.09412 green:0.6078 blue:0.09412 alpha:1.0]
+// hours > 8
+#define CALENDAR_DATE_COLOR_G8               [UIColor orangeColor]
+
+
+@protocol ABBCalendarDelegate;
+@class DateButton;
+
+@interface ABBCalendarView : UIView
+
+enum {
+    startSunday = 1,
+    startMonday = 2,
+};
+
+typedef int startDay;
+
+@property (nonatomic, strong) NSDate              *monthShowing;
+@property (nonatomic, strong) NSDate              *selectedDate;
+@property (nonatomic, strong) DateButton          *selectedBtn;
+@property (nonatomic, weak  ) id<ABBCalendarDelegate> delegate;
+
+
+//@property (strong, nonatomic) ABBDateInputView    *dateInput;
+//@property (strong, nonatomic) UIDatePicker        *datePicker;
+//@property (strong, nonatomic) UIActionSheet       *actionSheet;
+
+- (id)initWithStartDay:(startDay)firstDay;
+- (id)initWithStartDay:(startDay)firstDay frame:(CGRect)frame;
+- (void) markDayButtonByDate:(NSDate *)date withColorDot:(UIColor *)color hours:(float)hour;
+- (void)removeAllDateMark;
+- (void) setDateButtonUnable :(NSDate *)date;
+- (void) setDateButtonHoliday :(NSDate *)date;
+- (void) setDateButtonWeekend :(NSDate *)date;
+
+
+// Theming
+- (void)setTitleFont:(UIFont *)font;
+- (UIFont *)titleFont;
+
+- (void)setTitleColor:(UIColor *)color;
+- (UIColor *)titleColor;
+
+- (void)setButtonColor:(UIColor *)color;
+
+- (void)setInnerBorderColor:(UIColor *)color;
+
+- (void)setDayOfWeekFont:(UIFont *)font;
+- (UIFont *)dayOfWeekFont;
+
+- (void)setDayOfWeekTextColor:(UIColor *)color;
+- (UIColor *)dayOfWeekTextColor;
+
+- (void)setDayOfWeekBottomColor:(UIColor *)bottomColor topColor:(UIColor *)topColor;
+
+- (void)setDateFont:(UIFont *)font;
+- (UIFont *)dateFont;
+
+- (void)setDateTextColor:(UIColor *)color;
+- (UIColor *)dateTextColor;
+
+- (void)setDateBackgroundColor:(UIColor *)color;
+- (UIColor *)dateBackgroundColor;
+
+- (void)setDateBorderColor:(UIColor *)color;
+-(void)setCalendarContainerBackgroundColor:(UIColor *)color;
+- (UIColor *)dateBorderColor;
+
+@property (nonatomic, strong) UIColor *selectedDateTextColor;
+@property (nonatomic, strong) UIColor *selectedDateBackgroundColor;
+@property (nonatomic, strong) UIColor *currentDateTextColor;
+@property (nonatomic, strong) UIColor *currentDateBackgroundColor;
+@property (nonatomic, strong) UIColor *selectedBorderColor;
+@end
+
+@protocol ABBCalendarDelegate <NSObject>
+
+- (void)calendar:(ABBCalendarView *)calendar didSelectDate:(NSDate *)date;
+- (void)calendar:(ABBCalendarView *)calendar didMoveToMonth:(NSDate *)date;
+- (void)calendar:(ABBCalendarView *)calendar didSelectDateWithNoValue:(NSDate *)date;
+
+@end

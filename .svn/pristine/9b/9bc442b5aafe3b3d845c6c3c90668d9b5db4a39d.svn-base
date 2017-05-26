@@ -1,0 +1,59 @@
+
+//
+//  CarPartListController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/8.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CarPartListController.h"
+#import "FittingsCell.h"
+
+@interface CarPartListController ()
+
+@end
+
+static NSString *cellId = @"cellId";
+
+@implementation CarPartListController
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setNavTitle:@"零件列表"];
+}
+
+- (void)requestData{
+    [[NetworkEngine sharedNetwork] postBody:@{@"page":@"1",@"rows":@"10",@"carid":@"1",@"volume":@"4.0",@"merid":@"10",@"groupid":@"1"} apiPath:kCarPortListURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+            [self.dataSource addObjectsFromArray:resObj[@"body"][@"comList"]];
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        
+    }];;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 125*y_6_SCALE;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    FittingsCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+    if (!cell) {
+        cell = [[FittingsCell alloc]init];
+    }
+    [cell configCellWithDic:self.dataSource[indexPath.row]];
+
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (_commplete) {
+        _commplete(self.dataSource[indexPath.row]);
+    }
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+@end

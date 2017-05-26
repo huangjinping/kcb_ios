@@ -1,0 +1,78 @@
+//
+//  OutDetailViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/11.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OutDetailViewController.h"
+#import "OutStarView.h"
+#import "OutMessView.h"
+
+@interface OutDetailViewController ()
+
+@property (nonatomic, strong)UIScrollView *scrollView;
+@property (nonatomic, strong)UIView *footerView;
+
+@end
+
+@implementation OutDetailViewController
+{
+    UIImageView *_headerView;
+    OutStarView *_starView;
+    OutMessView *_phoneView;
+    OutMessView *_locView;
+    UIView *serviewView;
+    UIView *commentView;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self setNavTitle:@"门店详情"];
+    [self configUI];
+}
+
+- (void)configUI{
+    [self.view addSubview:self.scrollView];
+    _headerView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, self.scrollView.width, 172*y_6_SCALE)];
+    _headerView.image = [UIImage imageNamed:@"icon"];
+    _starView = [OutStarView shareOutStarView];
+    _starView.origin = CGPointMake(0, _headerView.bottom);
+    
+    _phoneView = [OutMessView shareOutMessView];
+    _phoneView.origin = CGPointMake(0, _starView.bottom+5*y_6_SCALE);
+    
+    _locView = [OutMessView shareOutMessView];
+    _locView.origin = CGPointMake(0, _phoneView.bottom+5*y_6_SCALE);
+    
+    [self.scrollView autoContentSize];
+    
+    [self.scrollView addSubview:_headerView];
+    [self.scrollView addSubview:_starView];
+    [self.scrollView addSubview:_phoneView];
+    [self.scrollView addSubview:_locView];
+    [self.scrollView addSubview:self.footerView];
+}
+
+- (UIScrollView *)scrollView{
+    if (_scrollView) {
+        return _scrollView;
+    }
+    _scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, APP_VIEW_Y, self.view.width, APP_HEIGHT-APP_VIEW_Y)];
+    _scrollView.showsVerticalScrollIndicator = NO;
+    
+    return _scrollView;
+}
+
+- (UIView *)footerView{
+    if (_footerView) {
+        return _footerView;
+    }
+    
+    _footerView = [[UIView alloc]initWithFrame:CGRectMake(0, self.scrollView.bottom-44*y_6_SCALE, self.scrollView.width, 44*y_6_SCALE)];
+    _footerView.backgroundColor = [UIColor whiteColor];
+    
+    return _footerView;
+}
+
+@end

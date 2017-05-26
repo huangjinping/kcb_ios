@@ -1,0 +1,30 @@
+{
+    "body":[
+            {
+            "loginmessang":"登陆成功",
+            "status":"1",
+            "userdata":{
+            "isnew":"0",
+            "logined":"0",
+            "logo":"admin/images/mer_logo.jpg",
+            "mername":"商户测试",
+            "mid":9,
+            "order":[
+            
+            ],
+            "paytype":"0",
+            "telphone":"18819881205",
+            "url":"download/kcb.app",
+            "vnum":2
+            }
+            }
+            ],
+    "head":{
+        "appVersion":"",
+        "dataVersion":"",
+        "deployVersion":"",
+        "msgCount":"",
+        "rspCode":"0",
+        "rspMsg":"成功"
+    }
+}

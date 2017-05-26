@@ -1,0 +1,267 @@
+//
+//  BillSearchController.m
+//  Merchant
+//
+//  Created by Wendy on 16/1/27.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "BillSearchController.h"
+#import "CustomInputView.h"
+#import "DateSelectView.h"
+#import "BillSearchCell.h"
+#import <MJRefresh.h>
+#import <MJExtension.h>
+#import "MEBillList.h"
+
+@interface BillSearchController ()<UITableViewDelegate,UITableViewDataSource>{
+    NSInteger currentPages;
+    NSInteger currentRefreshType;
+    NSMutableArray *_sortLetterArray;
+
+}
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) CustomInputView *startTime;
+@property (nonatomic, strong) CustomInputView *endTime;
+@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, strong) NSMutableDictionary *dataDict;
+@property (nonatomic, copy) NSString * price;
+@end
+
+@implementation BillSearchController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self buildUI];
+    self.dataArray = [[NSMutableArray alloc] initWithCapacity:0];
+    self.dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    _sortLetterArray = [[NSMutableArray alloc]initWithCapacity:0];
+    //上拉刷新
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingTarget:self refreshingAction:@selector(refreshBillManageListHeader)];
+    
+    //下拉加载更多
+    self.tableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(refreshBillManageListFooter)];
+}
+- (void)buildUI{
+    [self setNavTitle:@"账单查询"];
+    self.navigationItem.leftBarButtonItem = nil;
+    // Do any additional setup after loading the view.
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, self.view.height - APP_NAV_HEIGHT - APP_STATUS_BAR_HEIGHT-APP_TAB_HEIGHT) style:UITableViewStyleGrouped];
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    self.tableView.backgroundColor = [UIColor whiteColor];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:self.tableView];
+    [self createTableHeaderView];
+}
+- (void)createTabelFooterView{
+    UIView *footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, APP_WIDTH-20, 60)];
+    label.text = _price;
+    label.textAlignment = NSTextAlignmentRight;
+    label.font = V3_42PX_FONT;
+    label.textColor = kColor0X39B44A;
+    [footerView addSubview:label];
+    self.tableView.tableFooterView = footerView;
+}
+- (void)createTableHeaderView{
+    UIView *backView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 130)];
+    backView.backgroundColor = [UIColor whiteColor];
+    
+    __weak __typeof(self)weakSelf = self;
+    
+    _startTime = [[CustomInputView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 40) title:@"起止时间：" placeholder:@"" value:@""];
+    [_startTime setRightImage:@"list_mingxi02"];
+    _startTime.commplete = ^{
+        [[DateSelectView sharedDateSelectView].datePicker setDatePickerMode:UIDatePickerModeDate];
+        [[DateSelectView sharedDateSelectView] showWithCompletion:^(NSDate *date)
+         {
+             NSString *text = [date stringWithDateFormat:DateFormatWithYearMonthDay];
+             [weakSelf.startTime setTextField:text];
+         }];
+        
+    };
+    [backView addSubview:_startTime];
+    
+    //结束时间
+    _endTime = [[CustomInputView alloc] initWithFrame:CGRectMake(0, _startTime.bottom, APP_WIDTH, 40) title:@"终止时间：" placeholder:@"" value:@""];
+    [_endTime setRightImage:@"list_mingxi02"];
+    _endTime.commplete = ^{
+        [[DateSelectView sharedDateSelectView].datePicker setDatePickerMode:UIDatePickerModeDate ];
+        [[DateSelectView sharedDateSelectView] showWithCompletion:^(NSDate *date)
+         {
+             NSString *text = [date stringWithDateFormat:DateFormatWithYearMonthDay];
+             [weakSelf.endTime setTextField:text];
+         }];
+        
+    };    
+    [backView addSubview:_endTime];
+    
+    UIButton *searchBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    searchBtn.frame = CGRectMake(15, _endTime.bottom, APP_WIDTH-30, 40);
+    [searchBtn setTitle:@"查询"];
+    [searchBtn setTitleColor:kColor0X39B44A];
+    [searchBtn addBorderWithWidth:0.8 color:kColor0X39B44A corner:2];
+    [searchBtn addTarget:self action:@selector(btnAction:)];
+    [backView addSubview:searchBtn];
+
+    self.tableView.tableHeaderView = backView;
+}
+- (void)refreshBillManageListHeader{
+    currentRefreshType = RefreshTypeHeader;
+    currentPages = 1;
+    [self requestBill:currentPages];
+}
+- (void)refreshBillManageListFooter{
+    currentRefreshType = RefreshTypeFooter;
+    currentPages ++;
+    [self requestBill:currentPages];
+}
+- (void)btnAction:(UIButton *)sender{
+    currentPages = 1;
+    [self requestBill:currentPages];
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)requestBill:(NSInteger)page{
+    NSInteger merchantId = ApplicationDelegate.shareLoginData.userdata.mid;
+    NSDictionary *dict = @{@"merid":[NSNumber numberWithInteger:merchantId].stringValue,
+                           @"page":[NSNumber numberWithInteger:page].stringValue,
+                           @"rows":@"10",
+                           @"stime":BLANK(_startTime.text),
+                           @"etime":BLANK(_endTime.text)
+                           };
+    [AFNHttpRequest afnHttpRequestUrl:kHttpMybill param:dict success:^(id responseObject) {
+        if (currentRefreshType == RefreshTypeHeader) {
+            [self.tableView.mj_header endRefreshing];
+        }else if(currentRefreshType == RefreshTypeFooter){
+            [self.tableView.mj_footer endRefreshing];
+        }
+        [self createTabelFooterView];
+        if (currentPages == 1) {
+            [self.dataArray removeAllObjects];
+        }
+        
+        if (kRspCode(responseObject) == 0) {
+            NSDictionary *pBizCustomDict = responseObject[@"body"];
+            MEBillList * billList  = [MEBillList mj_objectWithKeyValues:pBizCustomDict];
+            NSArray *list = billList.myBill;
+            _price = billList.sumPrice;
+            if(list.count == 0 && currentPages >1){
+                currentPages --;
+            }
+            [self.dataArray addObjectsFromArray:list];
+            [self dealDataForSection];
+        }else{
+            [UIHelper alertWithMsg:kRspMsg(responseObject)];
+            if(currentRefreshType == RefreshTypeFooter && currentPages > 1){
+                currentPages --;
+            }
+        }
+
+
+    } failure:^(NSError *error) {
+        [UIHelper alertWithMsg:@"网络连接异常"];
+        if(currentRefreshType == RefreshTypeFooter && currentPages > 1){
+            currentPages --;
+        }
+
+    }];
+}
+- (void)dealDataForSection{
+    [_dataDict removeAllObjects];
+    
+    for (Mybill *item in self.dataArray) {
+        NSString *time = item.successTime.length >10 ?[item.successTime substringToIndex:10]:@"";
+        item.sectionTime = time;
+    }
+    
+    
+    [self.dataArray sortedArrayUsingComparator:^NSComparisonResult(Mybill *obj1, Mybill *obj2) {
+        return [obj1.successTime compare:obj2.successTime];
+    }];
+    
+    for (Mybill *item in self.dataArray) {
+        
+        NSMutableArray *letterArray = [_dataDict objectForKey:item.sectionTime];
+        
+        if (!letterArray) {
+            letterArray = [NSMutableArray array];
+            [_dataDict setObject:letterArray
+                          forKey:item.sectionTime];
+        }
+        
+        [letterArray addObject:item];
+    }
+
+    [_sortLetterArray removeAllObjects];
+    NSArray *array = [[_dataDict allKeys] sortedArrayUsingComparator:^NSComparisonResult (id obj1, id obj2) {
+        return [obj2 compare:obj1];
+    }];
+    [_sortLetterArray addObjectsFromArray:array];
+    
+    [self.tableView reloadData];
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 30;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 30)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, view.width-20, 29)];
+    label.text = _sortLetterArray[section];
+    label.font = V3_32PX_FONT;
+    label.textColor = kColor0X666666;
+    [view addSubview:label];
+    [view addLineWithFrame:CGRectMake(label.left, label.bottom, label.width, 1) lineColor:kLineColor];
+    return view;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return [_sortLetterArray count];
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [_dataDict[_sortLetterArray[section]] count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    BillSearchCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    
+    if (cell == nil) {
+        cell = [[BillSearchCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                      reuseIdentifier:identifier];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+    }
+    
+    NSArray *array = _dataDict[_sortLetterArray[indexPath.section]];
+    Mybill *item = array[indexPath.row];
+    
+    cell.titleLabel.text = item.carName;
+    [cell.button setBackgroundColor:kColor0X39B44A];
+    [cell.button setTitle:item.serviceName];
+    cell.amountLabel.text = item.sr;
+    
+    cell.button.imageEdgeInsets = UIEdgeInsetsMake(0, -cell.button.imageView.x, 0, 0);
+
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+}
+@end

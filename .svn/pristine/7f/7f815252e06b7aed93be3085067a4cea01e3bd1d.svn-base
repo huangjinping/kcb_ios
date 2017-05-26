@@ -1,0 +1,45 @@
+//
+//  EditPhotoView.m
+//  PatDog
+//
+//  Created by yzk on 14-8-20.
+//  Copyright (c) 2014年 cooperLink. All rights reserved.
+//
+
+#import "EditPhotoView.h"
+
+@implementation EditPhotoView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect
+{
+    CGFloat x = CGRectGetMidX(rect);
+    CGFloat y = CGRectGetMidY(rect);
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextBeginPath(context);
+    CGContextSetLineWidth(context, 2);
+    
+    CGContextAddRect(context, rect);
+
+    
+    if (self.shapeType == EditShapeTypeCircle) {
+        CGContextAddArc(context, x, y, kCircleRadius, 0, M_PI*2, 0);
+    }else {
+        CGContextAddRect(context, CGRectMake(x-kRectSizeWidth/2, y-kRectSizeHeight/2, kRectSizeWidth, kRectSizeHeight));
+//        CGContextAddRect(context, CGRectMake(x-kCircleRadius, y-kCircleRadius, 2*kCircleRadius, 2*kCircleRadius));
+    }
+    CGContextSetFillColorWithColor(context, [UIColor colorWithWhite:0 alpha:0.4].CGColor);
+    CGContextEOFillPath(context);
+}
+
+@end

@@ -1,0 +1,89 @@
+
+//
+//  OrderOutletCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/6.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderOutletCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OrderOutletCell
+{
+    UILabel *_nameL;
+    UIImageView *_icon;
+    UIImageView *_pV;
+    UILabel *_locationL;
+    UILabel *_distanceL;
+    UILabel *_phoneL;
+    
+    UIView *_line1;
+    UIView *_line2;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        CGFloat h = 22*y_6_SCALE;
+        _nameL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 200, h)
+                                           text:nil
+                                           font:FONT_SIZE(15, x_6_SCALE)
+                                      textColor:[UIColor blackColor]];
+        
+        _locationL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 200, h)
+                                               text:nil
+                                               font:FONT_SIZE(14, x_6_SCALE)
+                                          textColor:[UIColor blackColor]];
+        
+        _distanceL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 90*x_6_SCALE, h)
+                                               text:nil
+                                               font:FONT_SIZE(12, x_6_SCALE)
+                                          textColor:[UIColor redColor]];
+        
+        _phoneL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 160*x_6_SCALE, h)
+                                            text:nil
+                                            font:FONT_SIZE(14, x_6_SCALE)
+                                       textColor:[UIColor blackColor]];
+
+        _icon = [[UIImageView alloc]initWithFrame:CGRectMake(12*x_6_SCALE, 0, 130*x_6_SCALE, 90*y_6_SCALE)];
+        _pV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 30*x_6_SCALE, 30*y_6_SCALE)];
+        
+        _line1 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        _line2 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+    
+        [self.contentView addSubview:_nameL];
+        [self.contentView addSubview:_locationL];
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_distanceL];
+        [self.contentView addSubview:_phoneL];
+        [self.contentView addSubview:_pV];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _nameL.origin = CGPointMake(22*x_6_SCALE, 15*y_6_SCALE);
+    _icon.y = _nameL.bottom + 5*y_6_SCALE;
+    _locationL.origin = CGPointMake(_icon.right +5*x_6_SCALE, _icon.y);
+    _distanceL.origin = CGPointMake(_icon.right+120*x_6_SCALE, _locationL.bottom+10*y_6_SCALE);
+    _phoneL.origin = CGPointMake(_locationL.x, _distanceL.bottom+2*y_6_SCALE);
+    _pV.origin = CGPointMake(_phoneL.right, 0);
+    _pV.centerY = _phoneL.centerY;
+    _line2.y = self.contentView.height-1;
+}
+
+- (void)configCellWithDic:(NSDictionary *)dic{
+    _nameL.text = dic[@"name"];
+    _locationL.text = dic[@"location"];
+    _distanceL.text = [NSString stringWithFormat:@"距离：%@",dic[@"distance"]];
+    _phoneL.text = [NSString stringWithFormat:@"电话：%@",dic[@"phone"]];
+    _icon.image = [UIImage imageNamed:dic[@"icon"]];
+    _pV.image = [UIImage imageNamed:@"selectV"];
+}
+
+@end

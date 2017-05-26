@@ -1,0 +1,33 @@
+{
+    "body":{
+        "info":{
+            "abname":"商户测试",
+            "account_type":"0",
+            "address":"通州区九棵树家乐福四楼110室",
+            "city_id":"33",
+            "close_time":"22:00",
+            "cname":"北京市",
+            "contacts":"问问",
+            "describe_m":"该门店位于市郊吴大童街道，向左拐步行70米路北西南口",
+            "form_num":"510",
+            "id":"9",
+            "isclose":"1",
+            "level":"5.00",
+            "logo_pic":"admin/images/mer_logo.jpg",
+            "name":"商户测试",
+            "open_time":"09:00",
+            "pay_account":"445900029",
+            "phone_no":"18819881205",
+            "telno":"010-8481057"
+        },
+        "orderSize":"50"
+    },
+    "head":{
+        "appVersion":"",
+        "dataVersion":"",
+        "deployVersion":"",
+        "msgCount":"",
+        "rspCode":"0",
+        "rspMsg":"成功"
+    }
+}

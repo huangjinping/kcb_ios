@@ -1,0 +1,526 @@
+//
+//  Database.h
+//  ENT_tranPlat_iOS
+//
+//  Created by yanyan on 14-7-15.
+//  Copyright (c) 2014年 ___ENT___. All rights reserved.
+//
+
+/******************************************************
+ * 模块名称:   Database.h
+ * 模块功能:   数据库操作
+ * 创建日期:   14-7-15
+ * 创建作者:   闫燕
+ * 修改日期:
+ * 修改人员:
+ * 修改内容:
+ ******************************************************/
+
+#import <Foundation/Foundation.h>
+#import "FMDatabaseQueue.h"
+#import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
+
+//model
+#import "UserInfo.h"
+#import "CarInfo.h"
+#import "DriverInfo.h"
+#import "CarPeccancyRecord.h"
+#import "DriveLicensePeccancyRecord.h"
+#import "Msg.h"
+#import "Weather.h"
+#import "Xianxing.h"
+#import "ZhaohuiMsg.h"
+
+
+#define DATABASE_NAME @"ENT_TRANS_IOS.db"
+
+#define DATABASE_NAME_V0 @"ENT_TRANS_IOS_V0.db"
+
+#define DATABASE_NAME_V1 @"ENT_TRANS_IOS_V1.db"
+
+#define DATABASE_NAME_V2 @"ENT_TRANS_IOS_V2.db"
+
+//用户信息表
+/***************************************************************
+ 1、唯一标识     user_id
+ 2、用户名      user_name
+ 3、密码       password
+ 4、邮箱地址   email
+ 5、联系电话 contact_num
+ 6、邮编地址 post_code
+ 7、真实名字 real_name
+ 8、联系地址 addr
+ 9、注册时间 regist_time
+ 10、验证状态 verify_status  //0，未验证，1手机验证，2邮箱验证，3邮箱手机都验证
+ 11、登录时间 load_time
+ 12、城市     city_set
+ 13、版本号   version
+ 14、头像的本地地址     photo_local_path
+ 15、头像的服务器地址    photo_server_path
+ 16、是否为当前活跃用户   is_active
+ ***************************************************************/
+#define TABLE_USER @"user"
+#define CREATE_USER_TABLE @"CREATE TABLE user (_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, user_name TEXT, password TEXT, email TEXT, contact_num TEXT, post_code TEXT, real_name TEXT, addr TEXT, regist_time TEXT, verify_status TEXT, load_time TEXT, city_set TEXT, version TEXT, photo_local_path TEXT, photo_server_path TEXT, is_active)"
+
+//驾驶员信息表
+/***************************************************************
+ 1、driversfzmhm(驾驶员证件号码)
+ 2、dabh（档案编号）
+ 3、xm（姓名）
+ 4、driverstatus（驾驶证验证状态）
+ 5、ljjf（累积记分）
+ 6、zjcx（准驾车型）
+ 7、yxqz（有效期止）
+ 8、zxbh(证芯编号)
+ 9、drivergxsj(驾驶证信息更新时间)
+ 10、djzsxxdz（登记住所详细地址）
+ 11、user_id （关联user表标识）
+ 12、driverzt （驾照状态）
+ ***************************************************************/
+#define TABLE_DRIVER    @"driver"
+#define CREATE_DRIVER_TABLE     @"CREATE TABLE driver (_id INTEGER PRIMARY KEY AUTOINCREMENT, driversfzmhm TEXT, dabh TEXT, xm TEXT, driverstatus TEXT, ljjf TEXT, zjcx TEXT, yxqz TEXT, zxbh TEXT, drivergxsj TEXT, djzsxxdz TEXT, driverzt TEXT, user_id TEXT)"
+
+
+
+//车辆信息表
+/***************************************************************
+ 1、hpzl;             //号牌种类
+ 2、hpzlname;         //号牌种类名称
+ 3、hphm;             //号牌号码
+ 4、clsbdh;           //车辆识别代号
+ 5、clpp1;            //车辆品牌
+ 6、vehicletypename;  //车辆类型名称
+ 7、vehiclepic;       //车辆图片
+ 8、vehiclestatus;    //车辆验证状态
+ 9、yxqz;             //检验有效期止
+ 10、bxzzrq;           //保险终止日期
+ 11、ccdjrq;           //初次登记日期
+ 12、vehiclegxsj;      //车辆信息更新时间
+ 13、isupdate;            //车辆违法更新状态
+ 14.createTime          //车辆初次绑定日期
+ 14、user_id         （关联user表标识）
+ 15、zt              （新增 车辆状态）
+ 15、sfzmhm          （新增 身份证）
+ 15、syr             （新增 所有人）
+ ***************************************************************/
+#define TABLE_CAR @"car"
+#define CREATE_CAR_TABLE @"CREATE TABLE car (_id INTEGER PRIMARY KEY AUTOINCREMENT, hpzl TEXT, hpzlname TEXT, hphm TEXT, clsbdh TEXT, clpp1 TEXT, vehicletypename TEXT, vehiclepic TEXT, vehiclestatus TEXT, yxqz TEXT, bxzzrq TEXT, ccdjrq TEXT, vehiclegxsj TEXT, isupdate TEXT,createTime TEXT, user_id TEXT, zt TEXT, sfzmhm TEXT, syr TEXT, fdjh TEXT)"
+
+
+//机动车违法记录表
+/***************************************************************
+ 1、hpzl(号牌种类)
+ 2、hphm（号牌号码）
+ 3、jdcwf_detail（违法信息,json串）
+ 4、jdcwf_gxsj（违法更新时间）
+ 5、user_id （关联user表标识）
+ ***************************************************************/
+#define TABLE_CAR_PECCANCY   @"car_peccancy"
+#define CREATE_CAR_PECCANCY_TABLE     @"CREATE TABLE car_peccancy (_id INTEGER PRIMARY KEY AUTOINCREMENT, hpzl TEXT, hphm TEXT, jdcwf_detail TEXT, jdcwf_gxsj TEXT, user_id TEXT)"
+
+
+//驾驶证违法记录表
+/***************************************************************
+ 1、driversfzmhm(驾驶员证件号码)
+ 2、jszwf_detail（违法信息，json串）
+ 3、jszwf_gxsj（违法更新时间）
+ 4、user_id （关联user表标识）
+ ***************************************************************/
+#define TABLE_LICENSE_PECCANCY   @"driver_license_peccancy"
+#define CREATE_LICENSE_PECCANCY_TABLE     @"CREATE TABLE driver_license_peccancy (_id INTEGER PRIMARY KEY AUTOINCREMENT, driversfzmhm TEXT, jszwf_detail TEXT, jszwf_gxsj TEXT, user_id TEXT)"
+
+
+//通知、消息表
+/***************************************************************
+ 1、msg_ID（消息在服务器的id）
+ 2、msg_time（消息在服务器的标记时间）
+ 3、msg_title(消息标题)
+ 4、msg_content(消息内容)
+ 5、msg_read_status （消息读取状态【已读、未读】）
+ 6、msg_classify（消息类别）
+ 7、msg_user（消息用户）
+ ***************************************************************/
+#define TABLE_MSG   @"msg"
+#define CREATE_MSG_TABLE     @"CREATE TABLE msg (_id INTEGER PRIMARY KEY AUTOINCREMENT, msg_ID TEXT, msg_time TEXT, msg_title TEXT, msg_content TEXT, msg_read_status TEXT, msg_classify TEXT, msg_user TEXT)"
+
+#define MSG_STATUS_READ_ALREADY     @"read_already"
+#define MSG_STATUS_READ_NO          @"read_no"
+
+
+////违章照片表
+///***************************************************************
+// 1、localpath(图片本地路径)
+// 2、xh（）
+// 3、hphm（号牌号码）
+// 4、update_time （更新时间）
+// ***************************************************************/
+//#define TABLE_PHOTO   @"photo"
+//#define CREATE_LICENSE_PECCANCY_TABLE     @"CREATE TABLE driver_license_peccancy (_id INTEGER PRIMARY KEY AUTOINCREMENT, driversfzmhm TEXT, jszwf_detail TEXT, jszwf_gxsj TEXT, user_id TEXT)"
+
+
+//天气信息表
+/***************************************************************
+ 1、temp     (温度)
+ 2、des  （描述）
+ 3、detail（详情）
+ 4、logo_url （图标地址）
+ 5、xiche    (洗车指数)
+ 6、update_time (更新时间)
+ 7、other     (其他)
+ ***************************************************************/
+#define TABLE_WEATHER   @"weather"
+#define CREATE_WEATHER_TABLE     @"CREATE TABLE weather (_id INTEGER PRIMARY KEY AUTOINCREMENT, temp TEXT, des TEXT, detail TEXT, logo_url TEXT, xiche TEXT, update_time TEXT, other TEXT)"
+
+
+//限行信息表
+/***************************************************************
+ 1、start_date
+ 2、end_date
+ 3、special_date
+ 4、monday
+ 5、tuesday
+ 6、wednesday
+ 7、thursday
+ 8、friday
+ 9、saturday
+ 10、sunday
+ ***************************************************************/
+#define TABLE_XIANXING   @"xianxing"
+#define CREATE_XIANXING_TABLE     @"CREATE TABLE xianxing (_id INTEGER PRIMARY KEY AUTOINCREMENT, start_date TEXT, end_date TEXT, special_date TEXT, monday TEXT, tuesday TEXT, wednesday TEXT, thursday TEXT, friday TEXT, saturday TEXT, sunday TEXT)"
+
+//车辆召回信息
+/***************************************************************
+ 1、brand            车辆品牌
+ 2、cartype          车辆型号
+ 3、dealway          召回过程处理方式
+ 4、id_fanhui        id
+ 5、method           召回后处理方式
+ 6、period           周期
+ 7、reason           召回原因
+ 8、result           车辆故障会产生的后果
+ 9、clsbdh;          车辆识别代号==vin车架号
+ ***************************************************************/
+#define TABLE_ZHAOHUI   @"zhaohui"
+#define CREATE_ZHAOHUI_TABLE     @"CREATE TABLE zhaohui (_id INTEGER PRIMARY KEY AUTOINCREMENT, brand TEXT, cartype TEXT, dealway TEXT, id_fanhui TEXT, method TEXT, period TEXT, reason TEXT, result TEXT, clsbdh TEXT)"
+
+
+
+@interface DataBase : NSObject
+{
+    NSString                *_dbPath;
+    FMDatabaseQueue         *_queue;
+}
+
+/******************************************************
+ ** 功能:     获取当前类的单例对象
+ ** 参数:     无
+ ** 返回:     无
+ ******************************************************/
++(DataBase*) sharedDataBase;
+
+
+#pragma mark- 用户信息表相关操作
+
+/****************************************************
+ 功能：插入一条用户信息
+ 参数：UserInfo 用户信息model
+ 返回：无
+ **************************************************/
+- (void)insertUserInfo:(UserInfo*)user;
+
+/****************************************************
+ 功能：删除所有用户信息
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteAllUses;
+
+/****************************************************
+ 功能：更新一条用户信息（根据userid）
+ 参数：UserInfo 用户信息model
+ 返回：无
+ **************************************************/
+- (void)updateUserInfo:(UserInfo*)user;
+
+/****************************************************
+ 功能：查询当前活跃用户信息
+ 参数：无
+ 返回：NSArray[UserInfo] 用户信息model数组
+ **************************************************/
+- (NSArray*)selectActiveUser;
+
+/****************************************************
+ 功能：查询用户信息
+ 参数：NSString username
+ 返回：NSArray[UserInfo] 用户信息model数组
+ **************************************************/
+- (NSArray*)selectUserByName:(NSString*)username;
+
+#pragma mark- 车辆信息表相关操作
+
+/****************************************************
+ 功能：插入一条车辆信息
+ 参数：CarInfo 车辆信息model
+ 返回：无
+ **************************************************/
+- (void)insertCarInfo:(CarInfo *)car;
+
+/****************************************************
+ 功能：删除所有车辆信息
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteAllCarInfo;
+
+/****************************************************
+ 功能：删除一条车辆信息
+ 参数：NSString user_id
+ 返回：无
+ **************************************************/
+-(void)deleteCarInfoByUserId:(NSString*)userId;
+
+///****************************************************
+// 功能：删除一条车辆信息
+// 参数：
+// 返回：无
+// **************************************************/
+//- (void)deleteCarInfoByVehiclegxsj:(NSString*)vehiclegxsj;
+/****************************************************
+ 功能：删除一条车辆信息
+ 参数：
+ 返回：无
+ **************************************************/
+- (void)deleteCarInfoByHphm:(NSString*)hphm andUserId:(NSString*)userId;
+
+/****************************************************
+ 功能：查询车辆信息
+ 参数：NSString user_id
+ 返回：NSArray[CarInfo] 车辆信息model数组
+ **************************************************/
+- (NSArray*)selectCarByUserId:(NSString *)userId;
+//常用车辆排序
+- (NSArray*)selectCarzt:(NSString *)zt;
+
+/****************************************************
+ 功能：查询车辆信息
+ 参数：NSString user_id NSString hphm
+ 返回：NSArray[CarInfo] 车辆信息model数组
+ **************************************************/
+- (NSArray*)selectCarByUserId:(NSString *)userId andHphm:(NSString*)hphm;
+
+
+#pragma mark- 驾驶员信息表相关操作
+
+/****************************************************
+ 功能：插入一条驾驶员信息
+ 参数：DriverInfo 驾驶员信息model
+ 返回：无
+ **************************************************/
+- (void)insertDriverInfo:(DriverInfo *)driver;
+
+/****************************************************
+ 功能：删除所有驾驶员信息
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteAllDriverInfo;
+
+/****************************************************
+ 功能：删除一条驾驶员信息
+ 参数：NSString userId
+ 返回：无
+ **************************************************/
+-(void)deleteDriverInfoByUserId:(NSString*)userId;
+
+
+/****************************************************
+ 功能：删除一条驾驶员信息
+ 参数：NSString driversfzmhm
+ 返回：无
+ **************************************************/
+-(void)deleteDriverInfoByDriversfzmhm:(NSString*)driversfzmhm;
+
+/****************************************************
+ 功能：查询驾驶员信息
+ 参数：NSString   userId
+ 返回：NSArray[DriverInfo] 驾驶员信息model数组
+ **************************************************/
+- (NSArray*)selectDriverByUserId:(NSString *)userId;
+
+
+
+
+#pragma mark- 机动车违法记录表相关操作
+
+/****************************************************
+ 功能：插入一条机动车违法记录
+ 参数：CarPeccancyRecord 机动车违法记录model
+ 返回：无
+ **************************************************/
+- (void)insertCarPeccancyRecord:(CarPeccancyRecord *)record;
+
+/****************************************************
+ 功能：删除一条机动车违法记录
+ 参数：NSString userId, NSString hphm车牌号码
+ 返回：无
+ **************************************************/
+-(void)deleteCarPeccancyRecordByUserId:(NSString *)userId andHphm:(NSString*)hphm;
+
+/****************************************************
+ 功能：删除所有机动车违法记录
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteAllCarPeccancyRecord;
+
+/****************************************************
+ 功能：查询机动车违法记录
+ 参数：NSString userId NSString hphm车牌号码
+ 返回：NSArray[CarPeccancyRecord] 机动车违法记录model数组
+ **************************************************/
+- (NSArray*)selectCarPeccancyRecordByUserId:(NSString *)userId andHphm:(NSString*)hphm;
+
+
+
+#pragma mark- 驾驶证违法记录表相关操作
+
+/****************************************************
+ 功能：插入一条驾驶证违法记录
+ 参数：DriveLicensePeccancyRecord 驾驶证违法记录model
+ 返回：无
+ **************************************************/
+- (void)insertDriveLicensePeccancyRecord:(DriveLicensePeccancyRecord *)record;
+
+/****************************************************
+ 功能：删除所有驾驶证违法记录
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteAllDriveLicensePeccancyRecord;
+
+
+/****************************************************
+ 功能：删除一条驾驶证违法记录
+ 参数：NSString userId
+ 返回：无
+ **************************************************/
+-(void)deleteDriveLicensePeccancyRecordByUserId:(NSString *)userId;
+
+/****************************************************
+ 功能：查询驾驶证违法记录
+ 参数：NSString userId
+ 返回：NSArray[DriveLicensePeccancyRecord] 驾驶证违法记录model数组
+ **************************************************/
+- (NSArray*)selectDriveLicensePeccancyRecordByUserId:(NSString *)userId;
+
+
+
+
+#pragma mark- 通知、消息表相关操作
+
+/****************************************************
+ 功能：插入一条消息
+ 参数：Msg 消息model
+ 返回：无
+ **************************************************/
+- (void)insertMsg:(Msg *)msg;
+
+/****************************************************
+ 功能：更新消息
+ 参数：Msg msg 消息model
+ 返回：无
+ **************************************************/
+- (void)updateMsg:(Msg *)msg;
+
+/****************************************************
+ 功能：查询消息
+ 参数：NSString username 用户名
+ 返回：NSArray[Msg] 消息model数组
+ **************************************************/
+- (NSArray*)selectAllMsgByUser:(NSString*)username;
+
+/****************************************************
+ 功能：查询消息
+ 参数：NSString username 用户名
+ NSString msg_classify 消息类别
+ 返回：NSArray[Msg] 消息model数组
+ **************************************************/
+- (NSArray*)selectMsgByUser:(NSString*)username msg_classify:(NSString *)classify;
+
+/****************************************************
+ 功能：查询消息
+ 参数：NSString username 用户名
+ NSString status 消息读取状态
+ 返回：NSArray[Msg] 消息model数组
+ **************************************************/
+- (NSArray*)selectMsgByUser:(NSString*)username status:(NSString *)status;
+
+
+
+#pragma mark- 天气表相关操作
+/****************************************************
+ 功能：插入一条天气
+ 参数：Weather 天气model
+ 返回：无
+ **************************************************/
+- (void)insertWeather:(Weather *)wea;
+
+/****************************************************
+ 功能：更新天气
+ 参数：Weather  天气model
+ 返回：无
+ **************************************************/
+- (void)updateWeather:(Weather *)wea;
+
+/****************************************************
+ 功能：查询天气
+ 参数：无
+ 返回：NSArray[Weather] 天气model数组
+ **************************************************/
+- (NSArray*)selectWeather;
+
+
+#pragma mark- 限行表相关操作
+/****************************************************
+ 功能：插入一条限行
+ 参数：Xianxing 限行model
+ 返回：无
+ **************************************************/
+- (void)insertXianxing:(Xianxing *)xianxing;
+/****************************************************
+ 功能：删除限行
+ 参数：无
+ 返回：无
+ **************************************************/
+-(void)deleteXianxing;
+/****************************************************
+ 功能：查询限行
+ 参数：无
+ 返回：NSArray[Xianxing] 限行model数组
+ **************************************************/
+- (NSArray*)selectXianxing;
+
+#pragma mark- 车辆召回信息表相关操作
+/****************************************************
+ 功能：插入一条召回信息
+ 参数：Zhaohui 限行model
+ 返回：无
+ **************************************************/
+- (void)insertZhaohui:(ZhaohuiMsg *)zhaohui;
+
+/****************************************************
+ 功能：更新召回信息
+ 参数：Zhaohui  召回信息model
+ 返回：无
+ **************************************************/
+- (void)updateZhaohui:(ZhaohuiMsg *)zhaohui;
+
+/****************************************************
+ 功能：查询召回信息
+ 参数：车辆识别码==vin车架号
+ 返回：NSArray[Zhaohui] 召回信息model数组
+ **************************************************/
+- (NSArray*)selectZhaohuiByClsbdh:(NSString*)clsbdh;
+@end
+

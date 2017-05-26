@@ -1,0 +1,55 @@
+//
+//  MaintenanceHeaderCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/20.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "MaintenanceHeaderCell.h"
+#import "UILabel+Custom.h"
+
+@implementation MaintenanceHeaderCell
+{
+    UIView *_line;
+    UIImageView *_icon;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 22*y_6_plus)
+                                               text:nil
+                                               font:V3_42PX_FONT
+                                          textColor:kTextGreenColor];
+        _distanceLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 22*y_6_plus)
+                                                   text:nil
+                                                   font:V3_30PX_FONT
+                                              textColor:[UIColor colorWithHex:0x949694]];
+        _timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 22*y_6_plus)
+                                               text:nil
+                                               font:V3_30PX_FONT
+                                          textColor:[UIColor colorWithHex:0x949694]];
+        
+        _line = [self.contentView addLineWithFrame:CGRectMake(0, 0, 1, 16*y_6_plus) lineColor:kLineGrayColor];
+    
+    
+        [self.contentView addSubview:_nameLabel];
+        [self.contentView addSubview:_distanceLabel];
+        [self.contentView addSubview:_timeLabel];
+        [self.contentView addSubview:_line];
+    }
+    
+    return self;
+}
+
+-(void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _nameLabel.origin = CGPointMake(51*x_6_plus, 34*y_6_plus);
+    _distanceLabel.origin = CGPointMake(_nameLabel.x, _nameLabel.bottom+75*y_6_plus);
+    _line.origin = CGPointMake(_distanceLabel.right+10*x_6_plus, _distanceLabel.y+2*y_6_plus);
+    _timeLabel.origin = CGPointMake(_line.right+10*x_6_plus, _distanceLabel.y);
+}
+
+@end

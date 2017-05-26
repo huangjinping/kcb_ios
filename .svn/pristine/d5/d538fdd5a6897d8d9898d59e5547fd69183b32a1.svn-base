@@ -1,0 +1,51 @@
+//
+//  OrderCommentCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/21.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderCommentCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OrderCommentCell
+{
+    UILabel *_praiseLabel;
+    UILabel *_contentLabel;
+    UILabel *_phoneLabel;
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _praiseLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 750*x_6_plus, 60*y_6_plus)
+                                                text:@"好评"
+                                                font:WY_FONT_SIZE(30)
+                                           textColor:kGreenColor];
+        _contentLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60*y_6_plus)
+                                                 text:@"保养服务,不错不错!"
+                                                 font:WY_FONT_SIZE(30)
+                                            textColor:[UIColor colorWithHex:0x949694]];
+        _phoneLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60*y_6_plus)
+                                               text:@"138*****258"
+                                               font:WY_FONT_SIZE(30)
+                                          textColor:[UIColor colorWithHex:0x949694]];
+        
+        [self.contentView addSubview:_praiseLabel];
+        [self.contentView addSubview:_contentLabel];
+        [self.contentView addSubview:_phoneLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _praiseLabel.origin = CGPointMake(40*x_6_plus, 26*y_6_plus);
+    _contentLabel.origin = CGPointMake(_praiseLabel.x, _praiseLabel.bottom+8*y_6_plus);
+    _phoneLabel.origin = CGPointMake(APP_WIDTH-325*x_6_plus, _praiseLabel.y);
+    
+}
+
+@end

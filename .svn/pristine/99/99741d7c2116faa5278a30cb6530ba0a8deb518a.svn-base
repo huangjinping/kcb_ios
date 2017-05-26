@@ -1,0 +1,136 @@
+
+//
+//  OrderOutletCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/6.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderOutletCell.h"
+#import "UILabel+Custom.h"
+#import "CWStarRateView.h"
+
+@interface OrderOutletCell()
+
+@end
+@implementation OrderOutletCell
+{
+    UILabel *_nameL;
+    UIImageView *_icon;
+    UILabel *_distanceL;
+    
+    UILabel *_fuwu;
+    UILabel *_dizhi;
+    UILabel *_dianhua;
+    
+    CWStarRateView *_starV;
+    UILabel *_dzLabel;
+    UILabel *_dhLabel;
+    
+    UIView *_line1;
+    UIView *_line2;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        CGFloat h = 60*y_6_plus;
+        _nameL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 500*x_6_plus, h)
+                                           text:nil
+                                           font:V3_42PX_FONT
+                                      textColor:[UIColor blackColor]];
+        
+        _distanceL = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 460*x_6_plus, h)
+                                               text:@"距离"
+                                               font:V3_30PX_FONT
+                                          textColor:kTextOrangeColor];
+        
+        _fuwu = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 140*x_6_plus, h)
+                                               text:@"服务："
+                                               font:V3_32PX_FONT
+                                          textColor:kTextGrayColor];
+        
+        _dizhi = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 140*x_6_plus, h)
+                                               text:@"地址："
+                                               font:V3_32PX_FONT
+                                          textColor:kTextGrayColor];
+        
+        _dianhua = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 140*x_6_plus, h)
+                                               text:@"电话："
+                                               font:V3_32PX_FONT
+                                          textColor:kTextGrayColor];
+    
+        _starV = [[CWStarRateView alloc]initWithFrame:CGRectMake(0, 0, 308*x_6_plus, h) numberOfStars:5];
+        _starV.userInteractionEnabled = NO;
+        
+        _dzLabel = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 800*x_6_plus, h)
+                                           text:@"地址："
+                                           font:V3_32PX_FONT
+                                      textColor:kTextGrayColor];
+        
+        _dhLabel = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 800*x_6_plus, h)
+                                             text:@"电话："
+                                             font:V3_32PX_FONT
+                                        textColor:kTextGrayColor];
+
+        _icon = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 51*x_6_plus, 51*x_6_plus)];
+        _icon.image = [UIImage imageNamed:@"bangyang_02"];
+        
+        [self.contentView addSubview:_nameL];
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_distanceL];
+        [self.contentView addSubview:_fuwu];
+        [self.contentView addSubview:_dizhi];
+        [self.contentView addSubview:_dianhua];
+        [self.contentView addSubview:_starV];
+        [self.contentView addSubview:_dzLabel];
+        [self.contentView addSubview:_dhLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _icon.origin = CGPointMake(35*x_6_plus, 35*y_6_plus);
+    _nameL.origin = CGPointMake(_icon.right+5*x_6_plus, _icon.y);
+    _distanceL.origin = CGPointMake(_nameL.right, 0);
+    _distanceL.centerY = _nameL.centerY;
+    _fuwu.origin = CGPointMake(_nameL.x, _nameL.bottom+35*y_6_plus);
+    _starV.origin = CGPointMake(_fuwu.right, 0);
+    _starV.centerY = _fuwu.centerY;
+    _dizhi.origin = CGPointMake(_fuwu.x, _fuwu.bottom+20*y_6_plus);
+    _dianhua.origin = CGPointMake(_fuwu.x, _dizhi.bottom+20*y_6_plus);
+    
+    _dzLabel.origin = CGPointMake(_starV.x, _dizhi.y);
+    _dhLabel.origin = CGPointMake(_starV.x, _dianhua.y);
+}
+
+- (void)setScore:(NSNumber *)score{
+    _starV.scorePercent = [score floatValue]/5;
+}
+
+- (void)setName:(NSString *)name{
+    _nameL.text = name;
+}
+
+- (void)setAddress:(NSString *)address{
+    _dzLabel.text = address;
+}
+
+- (void)setPhone:(NSString *)phone{
+    _dhLabel.text = phone;
+}
+
+- (void)setDistance:(NSString *)distance{
+    if ([distance isLegal]) {
+        _distanceL.text = [NSString stringWithFormat:@"距离：%.1fKM",[distance floatValue]/1000];
+    }else{
+        _distanceL.text = nil;
+    }
+}
+
+@end

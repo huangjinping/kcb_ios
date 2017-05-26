@@ -1,0 +1,321 @@
+//
+//  OrderCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/13.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OrderCell
+{
+    UILabel *_orderNoLabel;
+    UILabel *_stateLabel;
+    UIImageView *_icon;
+    UILabel *_outNameLabel;
+    UIButton *_serviceTypeBtn;
+    UILabel *_detailLabel;
+    UILabel *_totalLabel;
+    UIImageView *_rV;
+    
+    UIView *_headerView;
+    UIView *_footerView;
+    
+    UIButton *_confirmDoneBtn;
+    UIButton *_cancleBtn;
+    UIButton *_waitCommentBtn;
+    UIButton *_refoundRBtn;
+    UIButton *_refoundLBtn;
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        
+        _headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 94*y_6_plus)];
+        _headerView.backgroundColor = kWhiteColor;
+        
+        _orderNoLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 260*x_6_SCALE, _headerView.height)
+                                                 text:@"" font:V3_32PX_FONT
+                                            textColor:[UIColor colorWithHex:0x666666]];
+        _stateLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 190*x_6_SCALE, _headerView.height)
+                                               text:@"" font:V3_32PX_FONT
+                                          textColor:kTextOrangeColor];
+        _stateLabel.textAlignment = NSTextAlignmentRight;
+        _icon = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 210*x_6_plus, 210*x_6_plus)];
+        [_icon addBorderWithWidth:1 color:kTextGrayColor];
+        
+        _outNameLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 600*x_6_plus, 22)
+                                                 text:@"" font:V3_38PX_FONT
+                                            textColor:kTextBlackColor];
+        _serviceTypeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        
+        _detailLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 110*x_6_SCALE, 22)
+                                                text:@"" font:FONT_SIZE(12, x_6_SCALE)
+                                           textColor:kTextBlackColor];
+        _totalLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 250*x_6_SCALE, 22)
+                                               text:@"" font:V3_32PX_FONT
+                                          textColor:kTextBlackColor];
+        _footerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 128*y_6_plus)];
+        _footerView.backgroundColor = kWhiteColor;
+        
+        _orderNoLabel.backgroundColor = kWhiteColor;
+        _stateLabel.backgroundColor = kWhiteColor;
+        
+        _refoundLBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_refoundLBtn setTitle:@"退款"];
+        [_refoundLBtn addTarget:self action:@selector(refound) forControlEvents:UIControlEventTouchUpInside];
+        _refoundLBtn.titleLabel.font = V3_34PX_FONT;
+        _refoundLBtn.layer.cornerRadius = 2;
+        _refoundLBtn.layer.masksToBounds = YES;
+        _refoundLBtn.size = CGSizeMake(100*x_6_SCALE, 70*y_6_plus);
+        
+        _refoundRBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_refoundRBtn setTitle:@"退款"];
+        [_refoundRBtn addTarget:self action:@selector(refound) forControlEvents:UIControlEventTouchUpInside];
+        _refoundRBtn.titleLabel.font = V3_34PX_FONT;
+        _refoundRBtn.layer.cornerRadius = 2;
+        _refoundRBtn.layer.masksToBounds = YES;
+        _refoundRBtn.size = CGSizeMake(100*x_6_SCALE, 70*y_6_plus);
+        
+        _confirmDoneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_confirmDoneBtn setTitle:@"确认完成"];
+        [_confirmDoneBtn addTarget:self action:@selector(confirmDone) forControlEvents:UIControlEventTouchUpInside];
+        _confirmDoneBtn.titleLabel.font = V3_34PX_FONT;
+        _confirmDoneBtn.layer.cornerRadius = 2;
+        _confirmDoneBtn.layer.masksToBounds = YES;
+        _confirmDoneBtn.size = CGSizeMake(100*x_6_SCALE, 70*y_6_plus);
+        
+        _cancleBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_cancleBtn setTitle:@"取消订单"];
+        [_cancleBtn addTarget:self action:@selector(cancle) forControlEvents:UIControlEventTouchUpInside];
+        _cancleBtn.titleLabel.font = V3_34PX_FONT;
+        _cancleBtn.layer.cornerRadius = 2;
+        _cancleBtn.layer.masksToBounds = YES;
+        _cancleBtn.size = CGSizeMake(100*x_6_SCALE, 70*y_6_plus);
+        
+        _waitCommentBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_waitCommentBtn setTitle:@"服务评价"];
+        [_waitCommentBtn addTarget:self action:@selector(waitComment) forControlEvents:UIControlEventTouchUpInside];
+        _waitCommentBtn.titleLabel.font = V3_34PX_FONT;
+        _waitCommentBtn.layer.cornerRadius = 2;
+        _waitCommentBtn.layer.masksToBounds = YES;
+        _waitCommentBtn.size = CGSizeMake(100*x_6_SCALE, 70*y_6_plus);
+        
+        [_refoundLBtn setTitleColor:kWhiteColor];
+        [_refoundRBtn setTitleColor:kWhiteColor];
+        [_confirmDoneBtn setTitleColor:kWhiteColor];
+        [_cancleBtn setTitleColor:kWhiteColor];
+        [_waitCommentBtn setTitleColor:kWhiteColor];
+        
+        _refoundLBtn.backgroundColor = kTextOrangeColor;
+        _refoundRBtn.backgroundColor = COLOR_NAV;
+        _confirmDoneBtn.backgroundColor = COLOR_NAV;
+        _cancleBtn.backgroundColor = COLOR_NAV;
+        _waitCommentBtn.backgroundColor = COLOR_NAV;
+        
+        _rV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 24*x_6_plus, 38*y_6_plus)];
+        _rV.image = [UIImage imageNamed:@"list_righticon"];
+        
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_outNameLabel];
+        [self.contentView addSubview:_serviceTypeBtn];
+        [self.contentView addSubview:_detailLabel];
+        [self.contentView addSubview:_footerView];
+        [self.contentView addSubview:_rV];
+        [self.contentView addSubview:_headerView];
+        
+        [_footerView addSubview:_totalLabel];
+        [_footerView addSubview:_confirmDoneBtn];
+        [_footerView addSubview:_cancleBtn];
+        [_footerView addSubview:_waitCommentBtn];
+        [_footerView addSubview:_refoundRBtn];
+        [_footerView addSubview:_refoundLBtn];
+        [_headerView addSubview:_stateLabel];
+        [_headerView addSubview:_orderNoLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _orderNoLabel.origin = CGPointMake(8*x_6_SCALE, 0);
+    _stateLabel.origin = CGPointMake(_headerView.width-_stateLabel.width-25*x_6_plus, 0);
+    _icon.origin = CGPointMake(38*x_6_plus,_orderNoLabel.bottom+40*y_6_plus);
+    _outNameLabel.origin = CGPointMake(_icon.right+46*x_6_plus, _icon.y);
+    _serviceTypeBtn.origin = CGPointMake(_outNameLabel.x, _outNameLabel.bottom+40*y_6_plus);
+    _detailLabel.origin = CGPointMake(_outNameLabel.x, _serviceTypeBtn.bottom+10*y_6_plus);
+    _totalLabel.origin = CGPointMake(40*x_6_plus, 0);
+    _totalLabel.centerY = _footerView.boundsCenter.y;
+    _confirmDoneBtn.frame = CGRectMake(self.contentView.width-40*x_6_plus-_confirmDoneBtn.width, 0, 234*x_6_plus, 70*y_6_plus);
+    _confirmDoneBtn.centerY = _footerView.boundsCenter.y;
+    _cancleBtn.frame = _confirmDoneBtn.frame;
+    _waitCommentBtn.frame = _cancleBtn.frame;
+    _refoundRBtn.frame = _cancleBtn.frame;
+    _refoundLBtn.frame = CGRectMake(_confirmDoneBtn.x-10-_refoundLBtn.width, _confirmDoneBtn.y, _confirmDoneBtn.width, _confirmDoneBtn.height);
+    _footerView.origin = CGPointMake(0, self.height-_footerView.height);
+    _rV.origin = CGPointMake(self.contentView.width-40*x_6_plus, 0);
+    _rV.centerY = self.contentView.boundsCenter.y;
+}
+
+- (void)configCellWithDic:(NSDictionary *)dic{
+    if (_serviceTypeBtn) {
+        [_serviceTypeBtn removeActionBlocksForControlEvents:UIControlEventTouchUpInside];
+    }
+    _orderNoLabel.text = [NSString stringWithFormat:@"订单编号：%@",dic[@"orderNo"]];
+    _outNameLabel.text = dic[@"merchantName"];
+    _orderNo = dic[@"orderNo"];
+    _orderId = dic[@"id"];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",[kWebserviceUrl hasPrefix:@"http"] ? kWebserviceUrl : [NSString stringWithFormat:@"http://%@",kWebserviceUrl] ,dic[@"merchantImage"]]];
+    [_icon sd_setImageWithURL:url];
+
+    
+    if ([dic[@"status"] isLegal]) {
+        switch ([dic[@"status"] integerValue]) {
+            case 0:
+                _stateLabel.text = @"等待付款";
+                _stateLabel.textColor = kTextOrangeColor;
+                _refoundLBtn.hidden = YES;
+                _refoundRBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                _cancleBtn.hidden = NO;
+                _cancleBtn.backgroundColor = COLOR_NAV;
+                
+                break;
+            case 1:
+                _stateLabel.text = @"等待商家接单";
+                _stateLabel.textColor = COLOR_NAV;
+                _refoundLBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _refoundRBtn.hidden = NO;
+                _refoundRBtn.backgroundColor = kTextOrangeColor;
+                
+                break;
+            case 2:
+                _stateLabel.text = @"等待服务";
+                _stateLabel.textColor = kTextOrangeColor;
+                _refoundRBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                _refoundLBtn.hidden = NO;
+                _confirmDoneBtn.hidden = NO;
+                _confirmDoneBtn.backgroundColor = COLOR_NAV;
+                
+                break;
+            case 3:
+                _stateLabel.text = @"等待评价";
+                _stateLabel.textColor = COLOR_NAV;
+                _refoundRBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _refoundLBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = NO;
+                _waitCommentBtn.backgroundColor = COLOR_NAV;
+                
+                break;
+            case 4:
+                _stateLabel.text = @"已评价";
+                _stateLabel.textColor = kTextOrangeColor;
+                _refoundRBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _refoundLBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                
+                break;
+            case 5:
+                _stateLabel.text = @"退款中";
+                _stateLabel.textColor = kTextOrangeColor;
+                _refoundRBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _refoundLBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                
+                break;
+            case 6:
+                _stateLabel.text = @"已退款";
+                _stateLabel.textColor = kTextOrangeColor;
+                _refoundRBtn.hidden = YES;
+                _cancleBtn.hidden = YES;
+                _refoundLBtn.hidden = YES;
+                _confirmDoneBtn.hidden = YES;
+                _waitCommentBtn.hidden = YES;
+                
+                break;
+                
+            default:
+                break;
+        }
+    }
+    
+    _totalLabel.text = [NSString stringWithFormat:@"实付：￥%.2f",[dic[@"payPrice"] floatValue]];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithString:_totalLabel.text];
+    [str addAttributes:@{NSFontAttributeName:V3_38PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(3, _totalLabel.text.length-3)];
+    [str addAttributes:@{NSForegroundColorAttributeName:kTextGrayColor,NSFontAttributeName:V3_32PX_FONT} range:NSMakeRange(0, 3)];
+    _totalLabel.attributedText = str;
+    _detailLabel.text = [NSString stringWithFormat:@"共%ld个产品，%ld项服务",(long)[dic[@"componentNum"] integerValue],(long)[dic[@"serviceNum"] integerValue]];
+    if (_detailLabel.text.length == 10) {
+        NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:_detailLabel.text];
+        [mAtt addAttributes:@{NSFontAttributeName:V3_32PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(0, 1)];
+        [mAtt addAttributes:@{NSFontAttributeName:V3_32PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(2, 4)];
+        [mAtt addAttributes:@{NSFontAttributeName:V3_32PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(7, 3)];
+        
+        [mAtt addAttributes:@{NSFontAttributeName:V3_32PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(1, 1)];
+        [mAtt addAttributes:@{NSFontAttributeName:V3_32PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(6, 1)];
+        _detailLabel.attributedText = mAtt;
+    }
+
+    switch ([dic[@"orderType"] integerValue]) {
+        case 1:
+            _serviceTypeBtn.frame = CGRectMake(0, 0, 264*x_6_plus, 48*y_6_plus);
+            [_serviceTypeBtn setImage:[UIImage imageNamed:@"grzx01"] forState:UIControlStateNormal];
+            [_serviceTypeBtn setTitle:@"自主保养服务"];
+            [_serviceTypeBtn setTitleColor:COLOR_NAV];
+            _serviceTypeBtn.titleLabel.font = V3_32PX_FONT;
+            _serviceTypeBtn.imageEdgeInsets = UIEdgeInsetsMake(0,-2*x_6_SCALE, 0, 0);
+            _serviceTypeBtn.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, -4*x_6_SCALE);
+            [_serviceTypeBtn addBorderWithWidth:1 color:COLOR_NAV corner:4*x_6_SCALE];
+            
+            [self setNeedsLayout];
+            
+            break;
+            
+        default:
+            break;
+    }
+}
+
+- (void)refound{
+    if ([self.delegate respondsToSelector:@selector(orderRefound:)]) {
+        [self.delegate orderRefound:self];
+    }
+}
+
+- (void)confirmDone{
+    if ([self.delegate respondsToSelector:@selector(orderConfirmFininshed:)]) {
+        [self.delegate orderConfirmFininshed:self];
+    }
+}
+
+- (void)cancle{
+    if ([self.delegate respondsToSelector:@selector(orderCancle:)]) {
+        [self.delegate orderCancle:self];
+    }
+}
+
+- (void)waitComment{
+    if ([self.delegate respondsToSelector:@selector(orderWattingForComment:)]) {
+        [self.delegate orderWattingForComment:self];
+    }
+}
+
+@end

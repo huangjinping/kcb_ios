@@ -1,0 +1,191 @@
+//
+//  OrderCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/13.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OrderCell
+{
+    UILabel *_orderNoLabel;
+    UILabel *_stateLabel;
+    UIImageView *_icon;
+    UILabel *_outNameLabel;
+    UILabel *_serviceLabel;
+    UILabel *_detailLabel;
+    UILabel *_totalLabel;
+    
+    UIView *_line0;
+    UIView *_line1;
+    UIView *_line2;
+    UIView *_line3;
+    
+    UIButton *_btnL;
+    UIButton *_btnR;
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        _orderNoLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 250*x_6_SCALE, 22)
+                                                 text:@"" font:FONT_SIZE(13, x_6_SCALE)
+                                            textColor:kTextBlackColor];
+        _stateLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 120*x_6_SCALE, 22)
+                                               text:@"" font:FONT_SIZE(13, x_6_SCALE)
+                                          textColor:[UIColor redColor]];
+        _stateLabel.textAlignment = NSTextAlignmentRight;
+        _icon = [[UIImageView alloc]init];
+        _outNameLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 110*x_6_SCALE, 22)
+                                                 text:@"" font:FONT_SIZE(17, x_6_SCALE)
+                                            textColor:kTextBlackColor];
+        _serviceLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 110*x_6_SCALE, 22)
+                                                 text:@"" font:FONT_SIZE(12, x_6_SCALE)
+                                            textColor:kTextBlackColor];
+        _detailLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 110*x_6_SCALE, 22)
+                                                text:@"" font:FONT_SIZE(12, x_6_SCALE)
+                                           textColor:kTextBlackColor];
+        _totalLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 250*x_6_SCALE, 22)
+                                               text:@"" font:FONT_SIZE(15, x_6_SCALE)
+                                          textColor:kTextBlackColor];
+        
+        _line0 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        _line1 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        _line2 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        _line3 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        
+        _btnL = [UIButton buttonWithType:UIButtonTypeCustom];
+        _btnL.size = CGSizeMake(100*x_6_SCALE, 22*y_6_SCALE);
+        [_btnL addBorderWithWidth:1 color:kTextBlackColor];
+        
+        _btnR = [UIButton buttonWithType:UIButtonTypeCustom];
+        _btnR.size = CGSizeMake(100*x_6_SCALE, 22*y_6_SCALE);
+        [_btnR addBorderWithWidth:1 color:kTextBlackColor];
+        
+        [_btnL setTitleColor:[UIColor redColor]];
+        [_btnR setTitleColor:[UIColor redColor]];
+        
+        [self.contentView addSubview:_orderNoLabel];
+        [self.contentView addSubview:_stateLabel];
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_outNameLabel];
+        [self.contentView addSubview:_serviceLabel];
+        [self.contentView addSubview:_detailLabel];
+        [self.contentView addSubview:_totalLabel];
+        [self.contentView addSubview:_btnL];
+        [self.contentView addSubview:_btnR];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _line0.origin = CGPointMake(0, 0);
+    _orderNoLabel.origin = CGPointMake(8*x_6_SCALE, 2);
+    _stateLabel.origin = CGPointMake(self.contentView.width-_stateLabel.width, 2);
+    _line1.origin = CGPointMake(0, _orderNoLabel.bottom);
+    _icon.origin = CGPointMake(20*x_6_SCALE,_line1.bottom+15*y_6_SCALE);
+    _icon.size = CGSizeMake(90*x_6_SCALE, 90*x_6_SCALE);
+    _outNameLabel.origin = CGPointMake(_icon.right+60*x_6_SCALE, _icon.y);
+    _serviceLabel.origin = CGPointMake(_outNameLabel.x, _outNameLabel.bottom+10*y_6_SCALE);
+    _detailLabel.origin = CGPointMake(_outNameLabel.x, _serviceLabel.bottom+10*y_6_SCALE);
+    _line2.origin = CGPointMake(0, _icon.bottom+15*y_6_SCALE);
+    _totalLabel.origin = CGPointMake(_icon.x, _line2.bottom+2*y_6_SCALE);
+    _btnR.frame = CGRectMake(self.contentView.width-2-_btnR.width, 1+_line2.bottom, 100*x_6_SCALE, 22*y_6_SCALE);
+    _btnL.frame = CGRectMake(_btnR.x-10-_btnL.width, _btnR.y, _btnL.width, _btnL.height);
+    _line3.origin = CGPointMake(0, self.contentView.height-1);
+}
+
+- (void)configCellWithDic:(NSDictionary *)dic{
+    _orderNoLabel.text = [NSString stringWithFormat:@"订单编号：%@",dic[@"orderNo"]];
+    _outNameLabel.text = dic[@"name"];
+    _orderNo = dic[@"orderNo"];
+    _orderId = dic[@"id"];
+    if ([dic[@"status"] isLegal]) {
+        __block __typeof(self) weakSelf = self;
+        switch ([dic[@"status"] integerValue]) {
+            case 0:
+                _stateLabel.text = @"等待付款";
+                _btnL.hidden = YES;
+                _btnR.hidden = NO;
+                [_btnR setTitle:@"取消订单"];
+                [_btnR addActionBlock:^(id weakSender) {
+                    if ([weakSelf.delegate respondsToSelector:@selector(orderCancle:)]) {
+                        [weakSelf.delegate orderCancle:weakSelf];
+                    }
+                } forControlEvents:UIControlEventTouchUpInside];
+                
+                break;
+            case 1:
+                _stateLabel.text = @"等待商家接单";
+                _btnL.hidden = YES;
+                _btnR.hidden = NO;
+                [_btnR setTitle:@"退款"];
+                [_btnR addActionBlock:^(id weakSender) {
+                    if ([weakSelf.delegate respondsToSelector:@selector(orderRefound:)]) {
+                        [weakSelf.delegate orderRefound:weakSelf];
+                    }
+                } forControlEvents:UIControlEventTouchUpInside];
+                
+                break;
+            case 2:
+                _stateLabel.text = @"等待服务";
+                _btnL.hidden = NO;
+                _btnR.hidden = NO;
+                [_btnL setTitle:@"退款"];
+                [_btnL addActionBlock:^(id weakSender) {
+                    if ([weakSelf.delegate respondsToSelector:@selector(orderRefound:)]) {
+                        [weakSelf.delegate orderRefound:weakSelf];
+                    }
+                } forControlEvents:UIControlEventTouchUpInside];
+                [_btnR setTitle:@"确认完成"];
+                [_btnR addActionBlock:^(id weakSender) {
+                    if ([weakSelf.delegate respondsToSelector:@selector(orderConfirmFininshed:)]) {
+                        [weakSelf.delegate orderConfirmFininshed:weakSelf];
+                    }
+                } forControlEvents:UIControlEventTouchUpInside];
+                
+                break;
+            case 3:
+                _stateLabel.text = @"等待评价";
+                _btnL.hidden = YES;
+                _btnR.hidden = NO;
+                [_btnR setTitle:@"服务评价"];
+                [_btnR addActionBlock:^(id weakSender) {
+                    if ([weakSelf.delegate respondsToSelector:@selector(orderWattingForComment:)]) {
+                        [weakSelf.delegate orderWattingForComment:weakSelf];
+                    }
+                } forControlEvents:UIControlEventTouchUpInside];
+                
+                break;
+            case -2:
+                _stateLabel.text = @"等待退款";
+                _btnL.hidden = _btnR.hidden = YES;
+
+                break;
+                
+            default:
+                break;
+        }
+    }
+    _icon.image = [UIImage imageNamed:@"placehoder"];
+    
+    _totalLabel.text = [NSString stringWithFormat:@"实付：%@",dic[@"payPrice"]];
+    switch ([dic[@"payType"] integerValue]) {
+        case 1:
+            _serviceLabel.text = @"自助保养服务";
+            _detailLabel.text = [NSString stringWithFormat:@"共%lu个产品，1项服务",(unsigned long)[(NSArray *)dic[@"consumer"] count]];
+            break;
+            
+        default:
+            break;
+    }
+}
+
+@end

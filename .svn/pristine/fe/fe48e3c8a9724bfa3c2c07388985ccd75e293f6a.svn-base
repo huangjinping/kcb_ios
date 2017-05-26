@@ -1,0 +1,38 @@
+//
+//  NetworkConfig.h
+//  Merchant
+//
+//  Created by Wendy on 15/12/16.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#ifndef NetworkConfig_h
+#define NetworkConfig_h
+
+#define kRspCode(json) [[[json objectForKey:@"head"] objectForKey:@"rspCode"] integerValue]
+#define kRspMsg(json)  [[json objectForKey:@"head"] objectForKey: @"rspMsg"]
+
+#define kHttpIPAddress @"http://132.96.77.130:8080/"
+
+#define kHttpLogin              @"m_user/mlogin"
+#define kHttpOrderList          @"m_order/orderDataGrid"
+#define kHttpOrderInfo          @"m_order/orderMsg"
+#define kHttpSummitRecOrder     @"m_order/summitRecOrder"
+#define kHttpRecComponet        @"m_order/recComponet"
+#define kHttpDealConsumer       @"m_order/dealConsumer"
+#define kHttpSettingList        @"m_merchant/serSettingList"
+#define kHttpSetting            @"m_merchant/serSetting"
+#define kHttpMerchantInfo       @"m_merchant/merchantInfo"
+#define kHttpEditMerchant       @"m_merchant/editMer"
+#define kHttpUploadMerImg       @"m_merchant/uploadMerImg"
+#define KHttpMerSwitch          @"m_merchant/merSwitch"
+#define kHttpEditLngLat         @"m_merchant/editLngLat"
+#define kHttpChangePwd          @"m_user/changePassword"
+
+#define kHttpMybill             @"/m_merchant/myBill"
+typedef enum : NSUInteger {
+    RefreshTypeHeader = 0,
+    RefreshTypeFooter,
+} RefreshType;
+
+#endif /* NetworkConfig_h */

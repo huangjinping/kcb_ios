@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++5854",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++5854" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++5854" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "01288E29-0BD5-4F73-8254-9B09C865C5D4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++5854" : "ios%E5%BC%80%E8%BD%A6%E5%B8%AE\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ENT_tranPlat_iOS",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "iOS_Project\/用户版2期\/ENT_tranPlat_iOS.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/132.96.77.10\/svn\/TranPlat",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++5854"
+    }
+  ]
+}

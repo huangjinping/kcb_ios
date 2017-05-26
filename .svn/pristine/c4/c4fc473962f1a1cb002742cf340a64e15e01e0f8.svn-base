@@ -1,0 +1,48 @@
+//  OrderPersonInfoCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/6.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderPersonInfoCell.h"
+
+@implementation OrderPersonInfoCell
+{
+    UILabel *_nameL;
+    UILabel *_phoneL;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _nameL = [[UILabel alloc]initWithFrame:CGRectMake(10*x_6_SCALE, 0, 60*x_6_SCALE, 22)];
+        _nameL.text = @"联系人:";
+        _nameL.font = FONT_SIZE(14, x_6_SCALE);
+        _nameF = [[UITextField alloc]initWithFrame:CGRectMake(_nameL.right, 0, 60, 22)];
+        [_nameF addBorderWithWidth:1 color:kLineGrayColor corner:10];
+        NSMutableAttributedString *matt = [[NSMutableAttributedString alloc]initWithString:@"  必填"];
+        [matt addAttributes:@{NSFontAttributeName:FONT_SIZE(12, x_6_SCALE)} range:NSMakeRange(0, 4)];
+        _nameF.attributedPlaceholder = matt;
+        
+        _phoneL = [[UILabel alloc]initWithFrame:CGRectMake(APP_WIDTH-100*x_6_SCALE-10*x_6_SCALE-60*x_6_SCALE, 0, 60*x_6_SCALE, 22)];
+        _phoneL.text = @"手机号:";
+        _phoneL.font = FONT_SIZE(14, x_6_SCALE);
+        _phoneF = [[UITextField alloc]initWithFrame:CGRectMake(_phoneL.right, 0, 100, 22)];
+        [_phoneF addBorderWithWidth:1 color:kLineGrayColor corner:10];
+        
+        [self.contentView addSubview:_nameF];
+        [self.contentView addSubview:_nameL];
+        [self.contentView addSubview:_phoneF];
+        [self.contentView addSubview:_phoneL];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _nameL.centerY = _nameF.centerY = _phoneL.centerY = _phoneF.centerY = self.contentView.boundsCenter.y;
+}
+@end

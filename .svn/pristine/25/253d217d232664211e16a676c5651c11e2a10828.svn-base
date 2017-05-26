@@ -1,0 +1,84 @@
+//
+//  RecommendMer.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/2/23.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "RecommendMer.h"
+#import "ServiceCell.h"
+
+@implementation RecommendMer
+{
+    NSInteger _page;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"推荐商户"];
+}
+
+- (void)viewDidLoad{
+    [super viewDidLoad];
+    _page = 1;
+    [self.tableView addLegendHeaderWithRefreshingTarget:self refreshingAction:@selector(headerRefreshing)];
+    [self.tableView addLegendFooterWithRefreshingTarget:self refreshingAction:@selector(footerRefreshing)];
+    self.tableView.header.updatedTimeHidden = YES;
+    self.tableView.footer.hidden = YES;
+    self.tableView.rowHeight = 250*y_6_plus;
+}
+
+- (void)headerRefreshing{
+    _page = 1;
+    [self requestData:MJRefreshTypeHeader];
+}
+
+- (void)footerRefreshing{
+    _page += 1;
+    [self requestData:MJRefreshTypeFooter];
+}
+
+
+- (void)requestData:(MJRefreshType)refreshType{
+    [UITools showIndicatorToView:self.view];
+    [[NetworkEngine sharedNetwork] postBody:@{@"cityCode":@"010",@"order":@"h",@"page":@(_page),@"rows":@"10"} apiPath:kRecommnedMerURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        [UITools hideHUDForView:self.view];
+        [self.tableView.header endRefreshing];
+        [self.tableView.footer endRefreshing];
+        if (state == StateSucceed) {
+            if (self.dataSource) {
+                self.dataSource = [NSMutableArray array];
+            }
+            if (refreshType != MJRefreshTypeFooter) {
+                [self.dataSource removeAllObjects];
+            }
+
+            [self.dataSource addObjectsFromArray:[resObj[@"body"][@"merList"] analysisConvertToArray]];
+            
+            self.tableView.footer.hidden = [[resObj[@"body"][@"merList"] analysisConvertToArray] count] < 10;
+
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        [UITools hideHUDForView:self.view];
+        [self.tableView.header endRefreshing];
+        [self.tableView.footer endRefreshing];
+    }];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return CGFLOAT_MIN;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ServiceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"servieCellId"];
+    if (!cell) {
+        cell = [[ServiceCell alloc] init];
+    }
+    [cell configCellWithDic:self.dataSource[indexPath.row]];
+    
+    return cell;
+}
+
+@end

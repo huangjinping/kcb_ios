@@ -1,0 +1,105 @@
+//
+//  TabBarController.m
+//  Merchant_tranPlat_iOS
+//
+//  Created by xinpenghe on 15/12/11.
+//  Copyright © 2015年 xinpenghe. All rights reserved.
+//
+
+#import "TabBarController.h"
+#import "HomeViewController.h"
+#import "OrderManageController.h"
+#import "CustomerManageController.h"
+#import "AccessoriesPurchaseController.h"
+#import "BillManageController.h"
+#import "MyStoreViewController.h"
+#import "ServiceSettingController.h"
+
+@interface TabBarController ()
+
+@end
+
+@implementation TabBarController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.tabBar.translucent     = NO;
+    self.tabBar.backgroundImage = [UIImage imageWithColor:[UIColor whiteColor]];
+    [self createCustomTabBarVC];
+}
+
+- (void)createCustomTabBarVC
+{
+    //设置选中状态和非选中的字体大小和颜色
+    [[UITabBarItem appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor colorWithHexString:@"#858687"], NSForegroundColorAttributeName, [UIFont boldSystemFontOfSize:12], NSFontAttributeName, nil] forState:UIControlStateNormal];
+    [[UITabBarItem appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor colorWithHexString:@"#e85614"], NSForegroundColorAttributeName, [UIFont boldSystemFontOfSize:12], NSFontAttributeName, nil] forState:UIControlStateSelected];
+    
+    
+    CATransition *animation = [CATransition animation];
+    animation.duration            = 0.25;
+    animation.timingFunction      = UIViewAnimationCurveEaseInOut;
+    animation.type                = kCATransitionFade;
+    animation.removedOnCompletion = YES;
+    
+    CGFloat offset = 3;
+    //首页
+    HomeViewController *homeV = [[HomeViewController alloc] init];
+    UINavigationController *homeNa = [[UINavigationController alloc] initWithRootViewController:homeV];
+    homeNa.tabBarItem.title = @"首页";
+    [homeNa.tabBarItem setTitlePositionAdjustment:UIOffsetMake(0, -offset)];
+    homeNa.tabBarItem.imageInsets = UIEdgeInsetsMake(-offset, 0, offset, 0);
+    homeNa.tabBarItem.image = [[UIImage imageNamed:@"item_butlerService_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    homeNa.tabBarItem.selectedImage = [[UIImage imageNamed:@"item_butlerService_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+    //订单管理
+    OrderManageController *orderMc = [[OrderManageController alloc] init];
+    UINavigationController *orderMVN = [[UINavigationController alloc] initWithRootViewController:orderMc];
+    [orderMVN.tabBarItem setTitlePositionAdjustment:UIOffsetMake(0, -offset)];
+    orderMVN.tabBarItem.imageInsets = UIEdgeInsetsMake(-offset, 0, offset, 0);
+    orderMVN.tabBarItem.title = @"订单管理";
+    orderMVN.tabBarItem.image = [[UIImage imageNamed:@"item_butlerService_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    orderMVN.tabBarItem.selectedImage = [[UIImage imageNamed:@"item_butlerService_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+    //账单
+    BillManageController *billMc = [[BillManageController alloc] init];
+    UINavigationController *purchaseVN = [[UINavigationController alloc] initWithRootViewController:billMc];
+    purchaseVN.tabBarItem.title = @"账单管理";
+    [purchaseVN.tabBarItem setTitlePositionAdjustment:UIOffsetMake(0, -offset)];
+    purchaseVN.tabBarItem.imageInsets = UIEdgeInsetsMake(-offset, 0, offset, 0);
+    purchaseVN.tabBarItem.image = [[UIImage imageNamed:@"item_butlerService_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    purchaseVN.tabBarItem.selectedImage = [[UIImage imageNamed:@"item_butlerService_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+    //服务设置
+    ServiceSettingController *AccessoriesPc = [[ServiceSettingController alloc] init];
+    UINavigationController *clientVN = [[UINavigationController alloc] initWithRootViewController:AccessoriesPc];
+    clientVN.tabBarItem.title = @"服务设置";
+    [clientVN.tabBarItem setTitlePositionAdjustment:UIOffsetMake(0, -offset)];
+    clientVN.tabBarItem.imageInsets = UIEdgeInsetsMake(-offset, 0, offset, 0);
+    clientVN.tabBarItem.image = [[UIImage imageNamed:@"item_butlerService_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    clientVN.tabBarItem.selectedImage = [[UIImage imageNamed:@"item_butlerService_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+    //我的门店
+    MyStoreViewController *customerMc = [[MyStoreViewController alloc] init];
+    UINavigationController *messVN = [[UINavigationController alloc] initWithRootViewController:customerMc];
+    messVN.tabBarItem.title = @"我的门店";
+    [messVN.tabBarItem setTitlePositionAdjustment:UIOffsetMake(0, -offset)];
+    messVN.tabBarItem.imageInsets = UIEdgeInsetsMake(-offset, 0, offset, 0);
+    messVN.tabBarItem.image = [[UIImage imageNamed:@"item_butlerService_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    messVN.tabBarItem.selectedImage = [[UIImage imageNamed:@"item_butlerService_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+        NSArray *viewControllers = @[homeNa, orderMVN, purchaseVN, clientVN,messVN];
+    self.viewControllers = viewControllers;
+//    [self configBadgeViewWithTabBar:tabBarVC.tabBar index:3];
+//    NSInteger index = [viewControllers indexOfObject:nmainVC];
+//    
+//    if (index != NSNotFound) {
+//        //设置默认启动主页
+//        tabBarVC.selectedIndex = index;
+//    } else {
+//        tabBarVC.selectedIndex = 0;
+//    }
+//    
+//    self.window.rootViewController = tabBarVC;
+}
+
+@end

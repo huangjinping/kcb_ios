@@ -1,0 +1,122 @@
+
+//
+//  OutletCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/4.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OutletCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OutletCell
+{
+    UILabel *_nameLabel;
+    UIImageView *_icon;
+    UILabel *_distanceLabel;
+    UILabel *_locationLabel;
+    UIButton *_selectBtn;
+    
+    UIView *_line1;
+    UIView *_line2;
+    UIView *_line3;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _nameLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 22)];
+        _nameLabel.font = FONT_SIZE(14, x_6_SCALE);
+        _icon = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 95*x_6_SCALE, 95*y_6_SCALE)];
+        _icon.contentMode = UIViewContentModeScaleAspectFit;
+        [_icon addBorderWithWidth:1 color:kLineGrayColor];
+//        _locationLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 200, 22)];
+//        _locationLabel.font = FONT_SIZE(14, x_6_SCALE);
+//        _distanceLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 100, 22)];
+//        _distanceLabel.font = FONT_SIZE(14, x_6_SCALE);
+        _locationLabel = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 200, 22)
+                                               text:nil
+                                               font:FONT_SIZE(14, x_6_SCALE)
+                                          textColor:[UIColor blackColor]];
+        
+        _distanceLabel = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 90*x_6_SCALE, 22)
+                                               text:nil
+                                               font:FONT_SIZE(12, x_6_SCALE)
+                                          textColor:[UIColor redColor]];
+        _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_selectBtn addActionBlock:^(id weakSender) {
+            if (_block) {
+                _block();
+            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        [_selectBtn setTitle:@"选择该门店"];
+        _selectBtn.titleLabel.font = FONT_SIZE(14, x_6_SCALE);
+
+        [_selectBtn setTitleColor:kTextGrayColor];
+        
+        _line1 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, .5f) lineColor:kLineGrayColor];
+        _line2 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, .5f) lineColor:kLineGrayColor];
+        _line3 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, .5f) lineColor:kLineGrayColor];
+        
+        [self.contentView addSubview:_nameLabel];
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_locationLabel];
+        [self.contentView addSubview:_distanceLabel];
+        [self.contentView addSubview:_selectBtn];
+        
+        [self.contentView addSubview:_line1];
+        [self.contentView addSubview:_line2];
+        [self.contentView addSubview:_line3];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _line1.origin = CGPointMake(0, 0);
+    _nameLabel.origin = CGPointMake(2*x_6_SCALE, 2);
+    _line1.origin = CGPointMake(0, _nameLabel.bottom);
+    _icon.origin = CGPointMake(10*x_6_SCALE, _line1.bottom+10*y_6_SCALE);
+//    _locationLabel.origin = CGPointMake(_icon.right+20*x_6_SCALE, 22);
+//    _distanceLabel.origin = CGPointMake(_locationLabel.x, _locationLabel.bottom + 20);
+    _locationLabel.origin = CGPointMake(_icon.right +5*x_6_SCALE, _icon.y);
+    _distanceLabel.origin = CGPointMake(_icon.right+130*x_6_SCALE, _locationLabel.bottom+10*y_6_SCALE);
+    _selectBtn.frame = CGRectMake(APP_WIDTH-40*x_6_SCALE-154*x_6_SCALE, _distanceLabel.bottom+10*y_6_SCALE, 154*x_6_SCALE, 30*y_6_SCALE);
+    _line3.origin = CGPointMake(0, self.contentView.height-1);
+    
+    [_selectBtn.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:[UIView class]]) {
+            UIView *v = obj;
+            if (v.layer.cornerRadius != 0) {
+                [v removeFromSuperview];
+            }
+        }
+    }];
+    
+    [_selectBtn addBorderWithWidth:.5f color:kLineGrayColor corner:10];
+}
+
+- (CGSize)sizeThatFits:(CGSize)size{
+    CGFloat totalHeight = 0;
+    totalHeight += [_nameLabel sizeThatFits:size].height;
+    totalHeight += [_icon sizeThatFits:size].height;
+    totalHeight += [_locationLabel sizeThatFits:size].height;
+    totalHeight += [_distanceLabel sizeThatFits:size].height;
+    totalHeight += [_selectBtn sizeThatFits:size].height;
+    
+    return CGSizeMake(size.width, totalHeight);
+}
+
+- (void)configCellWithDic:(NSDictionary *)dic{
+    _nameLabel.text = dic[@"name"];
+    _locationLabel.text = dic[@"address"];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",[kWebserviceUrl hasPrefix:@"http"] ? kWebserviceUrl : [NSString stringWithFormat:@"http://%@",kWebserviceUrl] ,dic[@"logo_pic"]]];
+    [_icon sd_setImageWithURL:url];
+    _distanceLabel.text = dic[@"distance"];
+}
+
+@end

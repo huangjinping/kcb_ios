@@ -1,0 +1,17 @@
+//
+//  MineOrderSortCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/15.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "MineOrderSortCell.h"
+
+@implementation MineOrderSortCell
+
+- (void)awakeFromNib {
+    _icon.contentMode = UIViewContentModeScaleAspectFit;
+}
+
+@end

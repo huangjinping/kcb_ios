@@ -1,0 +1,832 @@
+//
+//  MaintenanceController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/4.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "MaintenanceController.h"
+#import "MaintenanceItemCell.h"
+#import "SelectMaintenanceController.h"
+#import "SelectOutletController.h"
+#import "ConfirmOrderController.h"
+#import "CarPartListController.h"
+#import "MyCarController.h"
+#import "ABBCalendarView.h"
+#import "CaluteView.h"
+#import "FittingsCell.h"
+#import "MaintenanceCalendarCell.h"
+#import "CarInfo.h"
+#import "HCarModel.h"
+#import "MaintenanceHeaderCell.h"
+
+@implementation UILabel (custom)
+
+- (instancetype)initWithFrame:(CGRect)frame
+                         text:(NSString *)text
+                         font:(UIFont *)font
+                    textColor:(UIColor *)textColor{
+    
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.text = text;
+        self.textColor = textColor;
+        self.font = font;
+    }
+    
+    return self;
+}
+
+@end
+@interface MaintenanceController ()<UITableViewDataSource,UITableViewDelegate,MGSwipeTableCellDelegate,ABBCalendarDelegate>
+
+@property (nonatomic ,strong) UITableView *tableView;
+@property (nonatomic, strong) UIView *footerView;
+@property (nonatomic, strong) UIView *costView;
+@property (nonatomic, strong) NSMutableArray *dataSource;
+@property (nonatomic, strong) NSMutableArray *selectItems;
+
+@end
+
+static NSString *ItemCellId = @"ItemCellId";
+static NSString *fittingsCellId = @"fittingsCellId";
+static NSString *calendarcellId = @"calendarcellId";
+static NSString *headerCellId = @"headerCellId";
+
+#define sectionHeaderHeight (88*y_6_plus)
+#define sectionFooterHeight (92*y_6_plus)
+
+@implementation MaintenanceController
+{
+    NSArray *_itemSource;
+    NSMutableArray *_serviceArr;
+    CGFloat _totalPrice;
+    BOOL _folding;
+    BOOL _showingFooter;
+    
+    NSString *_serId;                   //车型ID
+    NSString *_bookingTime;             //预约日期
+    NSString *_merchantId;              //商户ID
+    NSString *_merchantName;            //商户名称
+    NSString *_merchantPhoto;           //商户头像
+    NSString *_merchantPhone;           //商户电话
+    NSString *_merchantAddress;         //商户地址
+    NSString *_chanelId;                //配件商Id
+    HCarModel *_carModel;               //汽车信息
+    
+    CarInfo *_car;
+    UILabel *_nameLabel;
+    UILabel *_distanceLabel;
+    UILabel *_timeLabel;
+    UILabel *_priceLabel;
+    ABBCalendarView *_calendarV;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"常规保养"];
+    [self loadCarType];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self initSource];
+    [self configUI];
+}
+
+- (void)configUI{
+    [self.view addSubview:self.tableView];
+    [self.view addSubview:self.footerView];
+}
+
+- (void)initSource{
+    [self initCarInfo];
+    _serviceArr = [@[] mutableCopy];
+    _serId = @"8";
+    _showingFooter = YES;
+    _totalPrice = 0;
+    [self requestData:_serId];
+    _folding = YES;
+    _selectItems = [@[] mutableCopy];
+    _itemSource = @[@{@"icon":@"bangyang_01",@"content":@"选择服务项目(小保养)"},
+                    @{@"icon":@"bangyang_02",@"content":@"选择门店"},
+                    @{@"icon":@"bangyang_03",@"content":@"选择预约安装时间"}];
+    
+    __weak __typeof(self) weakSelf = self;
+    __weak __typeof(_serId) weakSerId = _serId;
+    
+    self.commplete = ^(NSDictionary *dic){
+        weakSelf.carId = dic[@"id"];
+        [weakSelf requestData:weakSerId];
+    };
+}
+
+- (void)requestData:(NSString *)serId{
+    [[NetworkEngine sharedNetwork] postBody:@{@"carid":self.carId?self.carId:@"1",@"serids":serId,@"cityCode":@"010"} apiPath:kFittingMessURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+            if (!_dataSource) {
+                _dataSource = [NSMutableArray array];
+            }
+            [_dataSource removeAllObjects];
+            [_serviceArr addObjectsFromArray:[resObj[@"body"][@"serComList"] analysisConvertToArray]];
+            {
+                for (NSDictionary *dic in [resObj[@"body"][@"serComList"] analysisConvertToArray]) {
+                    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithDictionary:dic];
+
+                    for (NSDictionary *dic0 in dictionary[@"comList"]) {
+                        NSMutableDictionary *mDic = [NSMutableDictionary dictionaryWithDictionary:dic0];
+                        [mDic setObject:@"1" forKey:@"count"];
+                        [mDic setObject:dic[@"serName"] forKey:@"serName"];
+                        [mDic setObject:dic[@"serid"] forKey:@"serid"];
+                        _chanelId = [dic0[@"merid"] analysisConvertToString];
+                        
+                        [self.dataSource addObject:mDic];
+                    }
+                }
+                
+            }
+            [self calculatePrice];
+            [self.tableView reloadData];
+        }else{
+            if ([resObj[@"head"][@"rspCode"] isEqualToString:@"-1"]) {
+                [self.dataSource removeAllObjects];
+                [self.tableView reloadData];
+            }
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+- (void)refreshPriceView{
+    NSString *total = [NSString stringWithFormat:@"合计:¥%.2f(不含工时费)",_totalPrice];
+    
+    NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+    [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHex:0xff7a19],NSFontAttributeName:V3_46PX_FONT} range:NSMakeRange(3, total.length - 7)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(0, 3)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT} range:NSMakeRange(total.length-7, 7)];
+    
+    _priceLabel.attributedText = mAtt;
+}
+
+- (void)calculatePrice{
+    for (NSDictionary *dic in self.dataSource) {
+        _totalPrice += [dic[@"price"] floatValue];
+    }
+    
+    NSString *total = [NSString stringWithFormat:@"合计:¥%.2f(不含工时费)",_totalPrice];
+    
+    NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+    [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHex:0xff7a19],NSFontAttributeName:V3_46PX_FONT} range:NSMakeRange(3, total.length - 7)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(0, 3)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT} range:NSMakeRange(total.length-7, 7)];
+    
+    _priceLabel.attributedText = mAtt;
+}
+
+- (void)initCarInfo{
+    NSUserDefaults *u = [NSUserDefaults standardUserDefaults];
+    NSString *hphm = [u objectForKey:kFirstCarConfig];
+    if (hphm) {
+        NSArray *cars = [[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId andHphm:hphm];
+        if (cars.count) {
+            _car = cars[0];
+        }else{
+            //该车被取消绑定了
+            _car = [[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId][0];
+            [u setObject:_car.hphm forKey:kFirstCarConfig];
+            [u synchronize];
+        }
+    }else{
+        _car = [[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId][0];
+        [u setObject:_car.hphm forKey:kFirstCarConfig];
+        [u synchronize];
+    }
+    
+    _carModel = [[HCarModel alloc]init];
+    _carModel.LicenseCode = _car.hphm;
+    _carModel.carName = _car.clpp1;
+    _carModel.carModelId = _carId;
+    _carModel.carModelName = _car.hpzlname;
+    _carModel.clsbdh = _car.clsbdh;
+    _carModel.runTime = _car.ccdjrq;
+    _carModel.travelMileage = nil;
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, APP_VIEW_Y, self.view.width, APP_HEIGHT-APP_NAV_HEIGHT-
+                                                              APP_STATUS_BAR_HEIGHT-self.footerView.height+APP_STATUS_BAR_HEIGHT) style:UITableViewStyleGrouped];
+    [_tableView registerClass:[MaintenanceItemCell class] forCellReuseIdentifier:ItemCellId];
+    [_tableView registerClass:[FittingsCell class] forCellReuseIdentifier:fittingsCellId];
+    [_tableView registerClass:[MaintenanceHeaderCell class] forCellReuseIdentifier:headerCellId];
+    
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.showsVerticalScrollIndicator = NO;
+    
+    return _tableView;
+}
+
+- (UIView *)footerView{
+    if (_footerView) {
+        return _footerView;
+    }
+    _footerView = [[UIView alloc]initWithFrame:CGRectMake(0, APP_HEIGHT-44*y_6_SCALE+APP_STATUS_BAR_HEIGHT, APP_WIDTH, 144*y_6_plus)];
+    _footerView.backgroundColor = kWhiteColor;
+    UIButton *jiesuanBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [jiesuanBtn addActionBlock:^(id weakSender) {
+        ConfirmOrderController *cvc = [[ConfirmOrderController alloc]init];
+        cvc.dataArr = _serviceArr;
+        cvc.serids = _serId;
+        cvc.totalPrice = _totalPrice;
+        cvc.bookingTime = _bookingTime;
+        cvc.merchantId = _merchantId;
+        cvc.carModel = _carModel;
+        cvc.chanelId = _chanelId;
+        cvc.merchantAddress = _merchantAddress;
+        cvc.merchantName = _merchantName;
+        cvc.merchantPhone = _merchantPhone;
+        cvc.merchantImage = _merchantPhoto;
+        
+        if (![_merchantId isLegal]) {
+            [UITools alertWithMsg:@"请选择商户"];
+        }else if(![_bookingTime isLegal]){
+            [UITools alertWithMsg:@"请设置预约时间"];
+        }else{
+            [self.navigationController pushViewController:cvc animated:YES];
+        }
+    } forControlEvents:UIControlEventTouchUpInside];
+    [jiesuanBtn setTitle:@"去结算"];
+    [jiesuanBtn setTitleColor:kWhiteColor];
+    jiesuanBtn.backgroundColor = [UIColor colorWithHex:0xff7a19];
+    jiesuanBtn.frame = CGRectMake(_footerView.width-80*x_6_SCALE, 0, 80*x_6_SCALE, _footerView.height);
+    
+    _priceLabel = [[UILabel alloc]initWithFrame:CGRectMake(_footerView.width-jiesuanBtn.width-10*x_6_SCALE-200*x_6_SCALE, 0, 200*x_6_SCALE, _footerView.height)];
+    _priceLabel.textColor = [UIColor colorWithHex:0x666666];
+    _priceLabel.centerY = _footerView.boundsCenter.y;
+    _priceLabel.font = V3_46PX_FONT;
+    _priceLabel.textAlignment = NSTextAlignmentRight;
+    
+    ZKButton *kfButton =[ZKButton blockButtonWithFrame:CGRectMake(0, 58*y_6_plus, 162*x_6_plus, _footerView.height-116*y_6_plus) type:UIButtonTypeSystem title:@"客服" backgroundImage:nil andBlock:^(ZKButton *button) {
+        
+        NSLog(@"在线客服");
+        
+    }];
+    kfButton.centerY = _priceLabel.centerY;
+    [kfButton setImage:[UIImage imageNamed:@"custom_service"] forState:UIControlStateNormal];
+    kfButton.titleLabel.font = V3_28PX_FONT;
+    [kfButton setTitleColor:[UIColor colorWithHex:0x666666]];
+   
+   
+    
+    NSString *total = [NSString stringWithFormat:@"合计:¥--(不含工时费)"];
+    
+    NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+    [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor redColor],NSFontAttributeName:V3_46PX_FONT} range:NSMakeRange(3, total.length - 7)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(0, 3)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT} range:NSMakeRange(total.length-7, 7)];
+    _priceLabel.attributedText = mAtt;
+    [_footerView addSubview:kfButton];
+    [_footerView addSubview:_priceLabel];
+    [_footerView addSubview:jiesuanBtn];
+    
+    return _footerView;
+}
+
+- (void)loadCarType{
+    UIButton *carTypeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    carTypeBtn.frame = CGRectMake(self->_navigationImgView.width-10*x_6_SCALE-30*x_6_SCALE, 0, 30*x_6_SCALE, 20*y_6_SCALE);
+    carTypeBtn.centerY = self->_navigationImgView.boundsCenter.y;
+    [carTypeBtn setBackgroundImage:[UIImage imageNamed:@"menu_02"] forState:UIControlStateNormal];
+    [self->_navigationImgView addSubview:carTypeBtn];
+    
+    [carTypeBtn addActionBlock:^(id weakSender) {
+        if (![[[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId] count]) {
+            CarBindViewController *cvc = [[CarBindViewController alloc]init];
+            [self.navigationController pushViewController:cvc animated:YES];
+            
+            return ;
+        }
+        MyCarController *mvc = [[MyCarController alloc]init];
+        mvc.commplete = ^{
+            [self refreshHeaderView];
+        };
+        [self.navigationController pushViewController:mvc animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)createHeaderView:(UIView *)superView{
+    CGFloat h = sectionHeaderHeight/3;
+    _nameLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 22*y_6_plus, superView.width, h)
+                                                  text:@"道奇－酷威2013款2.4L 尊尚版"
+                                                  font:FONT_SIZE(22, x_6_SCALE)
+                                             textColor:[UIColor blackColor]];
+    
+    _distanceLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, _nameLabel.bottom, APP_WIDTH/2, h)
+                                                      text:@"行驶里程：35000"
+                                                      font:FONT_SIZE(15, x_6_SCALE)
+                                                 textColor:[UIColor blackColor]];
+    
+    _timeLabel = [[UILabel alloc]initWithFrame:CGRectMake(_distanceLabel.right, _nameLabel.bottom, APP_WIDTH/2, h)
+                                             text:@"上路时间：2011年12月"
+                                             font:FONT_SIZE(15, x_6_SCALE)
+                                        textColor:[UIColor blackColor]];
+    _timeLabel.backgroundColor = kWhiteColor;
+    
+    UILabel *discribeLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, _timeLabel.bottom, superView.width, h)
+                                                      text:@"准确的填写行驶里程及上路时间能够更准确多棒您匹配所需服务"
+                                                      font:FONT_SIZE(12, x_6_SCALE)
+                                                 textColor:[UIColor blackColor]];
+    
+    _nameLabel.textAlignment = NSTextAlignmentCenter;
+    _distanceLabel.textAlignment = NSTextAlignmentCenter;
+    discribeLabel.textAlignment = NSTextAlignmentCenter;
+    NSString *name = [NSString stringWithFormat:@"%@ %@",_car.clpp1,_car.hpzlname];
+    _nameLabel.text = name;
+//    distanceLabel.text = _car
+    _timeLabel.text = _car.ccdjrq;
+    
+    [superView addSubview:_nameLabel];
+    [superView addSubview:_distanceLabel];
+    [superView addSubview:_timeLabel];
+    [superView addSubview:discribeLabel];
+}
+
+- (void)refreshHeaderView{
+    
+    [self initCarInfo];
+    NSString *name = [_car.clpp1 stringByAppendingString:_car.hpzlname];
+    _nameLabel.text = name;
+    //    distanceLabel.text = _car
+    _timeLabel.text = _car.ccdjrq;
+}
+
+- (void)refreshBodyView{
+    [self.tableView reloadData];
+}
+
+#pragma mark - ABBCalendarViewDelegate
+- (void)calendar:(ABBCalendarView *)calendar didSelectDate:(NSDate *)date{
+    _bookingTime = [date stringWithDateFormat:DateFormatWithDateAndTime];
+    _folding = YES;
+    [self.tableView reloadData];
+}
+
+#pragma mark - UITableViewDelegate && UITableViewDataSource
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    if (section == 0) {
+        return CGFLOAT_MIN;
+    }else if (section == 1) {
+        return sectionHeaderHeight;
+    }else if (section == 2){
+        return 20*y_6_plus;
+    }
+    
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    if (section == 0) {
+        return CGFLOAT_MIN;
+    }else if (section == 1) {
+        return _folding ? CGFLOAT_MIN : 420;
+    }
+    
+    return _showingFooter ? sectionFooterHeight : CGFLOAT_MIN;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 2+self.dataSource.count;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section == 1) {
+        return 3;
+    }
+    
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        return 235*y_6_plus;
+    }else if (indexPath.section == 1){
+        return 138*y_6_plus;
+    }
+    
+    return 250*y_6_plus;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    if (section == 1) {
+        UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, sectionHeaderHeight)
+                                              text:@"准确填写行驶里程及上路时间，可更准确的帮您匹配所需服务"
+                                              font:V3_26PX_FONT
+                                         textColor:[UIColor colorWithHex:0xff7a19]];
+        l.textAlignment = NSTextAlignmentCenter;
+        
+        return l;
+    }
+//    if (section == 2) {
+//        UIView *v = [[UIView alloc]initWithFrame:CGRectMake(0, 0, tableView.width, 100*y_6_plus)];
+//        UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(10*x_6_SCALE, 0, tableView.width-10*x_6_SCALE, 40)];
+//        l.text = self.dataSource[section-2][@"serName"];
+//        [v addSubview:l];
+//        
+//        return v;
+//    }
+//    
+    return nil;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    if (section == 1 && !_folding) {
+         _calendarV = [[ABBCalendarView alloc]initWithStartDay:startSunday frame:CGRectMake(0, 0, APP_WIDTH, 320)];
+        _calendarV.delegate = self;
+        
+        return _calendarV;
+    }else if (section > 1){
+        if (_showingFooter) {
+            UIView *view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, tableView.width, sectionFooterHeight)];
+            view.backgroundColor = kWhiteColor;
+            
+            UILabel *priceLabel = [[UILabel alloc]initWithFrame:CGRectMake(tableView.width-36*x_6_plus-300*x_6_plus, 0, 300*x_6_plus, view.height)];
+            priceLabel.tag = section+999;
+            priceLabel.centerY = view.boundsCenter.y;
+            priceLabel.textAlignment = NSTextAlignmentRight;
+            priceLabel.text = @"￥--x1";
+            if (self.dataSource.count) {
+                NSNumber *count = self.dataSource[section-2][@"count"];
+                priceLabel.text = [NSString stringWithFormat:@"￥%.2fx%ld",[self.dataSource[section-2][@"price"] floatValue],(long)[count integerValue]];
+            }
+            
+            [view addSubview:priceLabel];
+            
+            CaluteView *cv=  [CaluteView shareCaluteView];
+            __weak __typeof(cv) weakCV = cv;
+            cv.block1 = ^(NSInteger n){
+                for (UIView *subV in weakCV.superview.subviews) {
+                    if ([subV isKindOfClass:[UILabel class]]) {
+                        UILabel *l = (UILabel *)subV;
+                        l.text = [NSString stringWithFormat:@"￥%.2fx%ld",[self.dataSource[section-2][@"price"] floatValue],(long)n];
+                    }
+                }
+                _totalPrice = _totalPrice+[self.dataSource[section-2][@"price"] floatValue];
+                [self refreshPriceView];
+            };
+            cv.block2 = ^(NSInteger n){
+                for (UIView *subV in weakCV.superview.subviews) {
+                    if ([subV isKindOfClass:[UILabel class]]) {
+                        UILabel *l = (UILabel *)subV;
+                        l.text = [NSString stringWithFormat:@"￥%.2fx%ld",[self.dataSource[section-2][@"price"] floatValue],(long)n];
+                    }
+                }
+                _totalPrice = _totalPrice-[self.dataSource[section-2][@"price"] floatValue];
+                [self refreshPriceView];
+            };
+            cv.origin = CGPointMake(priceLabel.x-cv.width, 0);
+            cv.centerY = view.boundsCenter.y;
+            [view addSubview:cv];
+            
+            return view;
+        }
+    }
+    return nil;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        MaintenanceHeaderCell *cell = [tableView dequeueReusableCellWithIdentifier:headerCellId];
+        if (!cell) {
+            cell = [[MaintenanceHeaderCell alloc]init];
+        }
+        NSString *name = [NSString stringWithFormat:@"%@ %@",_car.clpp1,_car.hpzlname];
+        cell.nameLabel.text = name;
+        cell.timeLabel.text = [NSString stringWithFormat:@"上路时间：%@",_car.ccdjrq];
+        cell.distanceLabel.text =[NSString stringWithFormat:@"行驶里程：%@", @"*****"];
+        
+        _nameLabel = cell.nameLabel;
+        _timeLabel = cell.timeLabel;
+        _distanceLabel = cell.distanceLabel;
+
+        return cell;
+        
+    }else if (indexPath.section == 1){
+        MaintenanceItemCell *cell = [tableView dequeueReusableCellWithIdentifier:ItemCellId];
+        if (!cell) {
+            cell = [[MaintenanceItemCell alloc]init];
+        }
+        [cell configCellWithDic:_itemSource[indexPath.row]];
+        
+        
+        if (indexPath.row == 0) {
+            if (!_selectItems.count) {
+                cell.res = YES;
+            }else{
+                NSMutableString *mStr = [NSMutableString string];
+                for (NSDictionary *dic in _selectItems) {
+                    [mStr appendFormat:@"%@,",dic[@"name"]];
+                }
+                NSString *name = [mStr substringToIndex:mStr.length-1];
+                cell.contentLabel.text = name;
+                cell.contentLabel.textColor = [UIColor colorWithHex:0xff7a19];
+            }
+        }else if (indexPath.row == 1 && [_merchantName isLegal]) {
+            cell.contentLabel.text = _merchantName;
+        }else{
+            if (_bookingTime && indexPath.row == 2) {
+                cell.contentLabel.text = _bookingTime;
+                cell.contentLabel.textColor = [UIColor colorWithHex:0xff7a19];
+            }
+        }
+
+        return cell;
+    }
+    
+    FittingsCell *cell = [tableView dequeueReusableCellWithIdentifier:fittingsCellId];
+    if (!cell) {
+        cell = [[FittingsCell alloc]init];
+    }
+    cell.delegate = self;
+    [cell configCellWithDic:self.dataSource[indexPath.section-2]];
+//    cell.commplete = ^(NSInteger a,CGFloat price,NSInteger num){      //加/减   价格    数量
+//        if (a == 1) {
+//            if (num > 1) {
+//                _totalPrice -= price;                                   //减法
+//            }
+//        }else{                                                          //加法
+//            _totalPrice += price;
+//        }
+//        {
+//            NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:_dataSource[indexPath.section-2][@"comList"][indexPath.row]];
+//            dic[@"count"] = [NSString stringWithFormat:@"%ld",(long)num];
+//            NSMutableArray *mArr = [_dataSource[indexPath.section-2][@"comList"] mutableCopy];
+//            [mArr replaceObjectAtIndex:indexPath.row withObject:dic];
+//            NSMutableDictionary *mDic = [_dataSource[indexPath.section-2] mutableCopy];
+//            [mDic setObject:mArr forKey:@"comList"];
+//            [_dataSource replaceObjectAtIndex:indexPath.section-2 withObject:mDic];
+//            [tableView reloadData];
+//        }
+//        
+//        NSString *total = [NSString stringWithFormat:@"合计:¥%.2f(不含工时费)",_totalPrice];
+//        NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+//        [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHex:0xff7a19],NSFontAttributeName:V3_46PX_FONT} range:NSMakeRange(3, total.length - 7)];
+//        [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT,NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666]} range:NSMakeRange(0, 3)];
+//        [mAtt addAttributes:@{NSFontAttributeName:V3_30PX_FONT} range:NSMakeRange(total.length-7, 7)];
+//        
+//        _priceLabel.attributedText = mAtt;
+//    };
+//    
+//    cell.delegate = self;
+//    NSArray *arr = _dataSource[indexPath.section-2][@"comList"];
+//    [cell configCellWithDic:arr[indexPath.row]];
+//    cell.typeId = _dataSource[indexPath.section-2][@"serid"];
+    
+    return cell;
+    
+    
+//    
+//    
+//    
+//    
+//    
+//    
+//    
+//    
+//    if (indexPath.section == 1 || indexPath.section == 2) {
+//        MaintenanceItemCell *cell = [tableView dequeueReusableCellWithIdentifier:ItemCellId];
+//        if (!cell) {
+//            cell = [[MaintenanceItemCell alloc]init];
+//        }
+//        [cell configCellWithDic:_itemSource[indexPath.section]];
+//        
+//        if (indexPath.section == 1) {
+//            if (!_selectItems.count) {
+//                cell.res = YES;
+//            }else{
+//                NSMutableString *mStr = [NSMutableString string];
+//                for (NSDictionary *dic in _selectItems) {
+//                    [mStr appendFormat:@"%@,",dic[@"name"]];
+//                }
+//                NSString *name = [mStr substringToIndex:mStr.length-1];
+//                cell.contentLabel.text = name;
+//                cell.contentLabel.textColor = [UIColor redColor];
+//            }
+//        }
+//        if (indexPath.section == 2 && [_merchantName isLegal]) {
+//            cell.contentLabel.text = _merchantName;
+//        }
+//        
+//        return cell;
+//    }else if(indexPath.section == 3){
+//        MaintenanceCalendarCell *cell = [tableView dequeueReusableCellWithIdentifier:calendarcellId];
+//        if (!cell) {
+//            cell = [[MaintenanceCalendarCell alloc]init];
+//        }
+//        cell.commplete = ^(NSDate *date){
+//            _bookingTime = [date stringWithDateFormat:DateFormatWithDateAndTime];
+//            _folding = NO;
+//            [tableView reloadData];
+//        };
+//        
+//        return cell;
+//    }else{
+//        FittingsCell *cell = [tableView dequeueReusableCellWithIdentifier:fittingsCellId];
+//        if (!cell) {
+//            cell = [[FittingsCell alloc]init];
+//        }
+//        cell.commplete = ^(NSInteger a,CGFloat price,NSInteger num){      //加/减   价格    数量
+//            if (a == 1) {
+//                if (num > 1) {
+//                    _totalPrice -= price;                                   //减法
+//                }
+//            }else{                                                          //加法
+//                _totalPrice += price;
+//            }
+//            {
+//                NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:_dataSource[indexPath.section-_itemSource.count][@"comList"][indexPath.row]];
+//                dic[@"count"] = [NSString stringWithFormat:@"%ld",(long)num];
+//                NSMutableArray *mArr = [_dataSource[indexPath.section-_itemSource.count][@"comList"] mutableCopy];
+//                [mArr replaceObjectAtIndex:indexPath.row withObject:dic];
+//                NSMutableDictionary *mDic = [_dataSource[indexPath.section-_itemSource.count] mutableCopy];
+//                [mDic setObject:mArr forKey:@"comList"];
+//                [_dataSource replaceObjectAtIndex:indexPath.section-_itemSource.count withObject:mDic];
+//                [tableView reloadData];
+//            }
+//            
+//            NSString *total = [NSString stringWithFormat:@"¥%.2f(不含工时费)",_totalPrice];
+//            NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+//            [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor redColor],NSFontAttributeName:FONT_SIZE(22, x_6_SCALE)} range:NSMakeRange(0, total.length - 7)];
+//            [mAtt addAttributes:@{NSFontAttributeName:FONT_SIZE(11, x_6_SCALE)} range:NSMakeRange(total.length-7, 7)];
+//            _priceLabel.attributedText = mAtt;
+//        };
+//        
+//        cell.delegate = self;
+//        [cell configCellWithDic:_dataSource[indexPath.section-_itemSource.count][@"comList"][indexPath.row]];
+//        cell.typeId = _dataSource[indexPath.section-_itemSource.count][@"serid"];
+//        
+//        return cell;
+//    }
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 1) {
+        if (indexPath.row == 0) {
+            SelectMaintenanceController *svc = [[SelectMaintenanceController alloc]init];
+            svc.selectItems = _selectItems;
+            svc.commplete = ^(NSMutableArray *arr){
+                NSMutableString *serids = [NSMutableString string];
+                for (NSDictionary *dic in arr) {
+                    [serids appendFormat:@",%@",dic[@"id"]];
+                }
+                NSString *serId = [serids substringWithRange:NSMakeRange(1, serids.length-1)];
+                [self requestData:serId];
+                _serId = serId;
+                _selectItems = arr;
+            };
+            [self.navigationController pushViewController:svc animated:YES];
+        }else if (indexPath.row == 1){
+            SelectOutletController *svc = [[SelectOutletController alloc]init];
+            
+            svc.serids = _serId;
+            svc.block = ^(NSString *merchantId,NSString *name,NSString *photo,NSString *phone,NSString *address){
+                MaintenanceItemCell *cell = (MaintenanceItemCell *)[tableView cellForRowAtIndexPath:indexPath];
+                cell.contentLabel.text = name;
+                cell.contentLabel.textColor = [UIColor colorWithHex:0xff7a19];
+                _merchantId = merchantId;
+                _merchantName = name;
+                _merchantPhoto = photo;
+                _merchantAddress = address;
+                _merchantPhone = phone;
+            };
+            [self.navigationController pushViewController:svc animated:YES];
+        }else{
+            _folding = !_folding;
+            [tableView reloadData];
+        }
+    }
+    
+//    
+//    if (indexPath.section == 0) {
+//        SelectMaintenanceController *svc = [[SelectMaintenanceController alloc]init];
+//        svc.selectItems = _selectItems;
+//        svc.commplete = ^(NSMutableArray *arr){
+//            NSMutableString *serids = [NSMutableString string];
+//            for (NSDictionary *dic in arr) {
+//                [serids appendFormat:@",%@",dic[@"id"]];
+//            }
+//            NSString *serId = [serids substringWithRange:NSMakeRange(1, serids.length-1)];
+//            [self requestData:serId];
+//            _serId = serId;
+//            _selectItems = arr;
+//        };
+//        [self.navigationController pushViewController:svc animated:YES];
+//    }else if (indexPath.section == 1){
+//        SelectOutletController *svc = [[SelectOutletController alloc]init];
+//        
+//        svc.serids = _serId;
+//        svc.block = ^(NSString *merchantId,NSString *name,NSString *photo,NSString *phone,NSString *address){
+//            MaintenanceItemCell *cell = (MaintenanceItemCell *)[tableView cellForRowAtIndexPath:indexPath];
+//            cell.contentLabel.text = name;
+//            cell.contentLabel.textColor = [UIColor redColor];
+//            _merchantId = merchantId;
+//            _merchantName = name;
+//            _merchantPhoto = photo;
+//            _merchantAddress = address;
+//            _merchantPhone = phone;
+//        };
+//        NSLog(@"%@",_merchantId);
+//        [self.navigationController pushViewController:svc animated:YES];
+//    }
+}
+
+#pragma mark -------------------- MGSwipeTableCellDelegate ---------------------
+
+- (NSArray *)swipeTableCell:(MGSwipeTableCell *)cell swipeButtonsForDirection:(MGSwipeDirection)direction swipeSettings:(MGSwipeSettings *)swipeSettings expansionSettings:(MGSwipeExpansionSettings *)expansionSettings{
+    swipeSettings.transition = MGSwipeTransitionStatic;
+    expansionSettings.buttonIndex = -1;
+    expansionSettings.fillOnTrigger = YES;
+    
+    if (direction == MGSwipeDirectionRightToLeft) {
+        NSMutableArray *mArr = [NSMutableArray array];
+        
+        UIButton *deleteBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [deleteBtn setImage:[UIImage imageNamed:@"baoyang_del"] forState:UIControlStateNormal];
+        deleteBtn.frame = CGRectMake(0, 0, 180*x_6_plus, 273*y_6_plus);
+        deleteBtn.backgroundColor = [UIColor colorWithHex:0xcccccc];
+        [mArr addObject:deleteBtn];
+        
+        UIButton *changeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [changeBtn setImage:[UIImage imageNamed:@"baoyang_change"] forState:UIControlStateNormal];
+        changeBtn.frame = CGRectMake(0, 0, 180*x_6_plus, 273*y_6_plus);
+        changeBtn.backgroundColor = COLOR_NAV;
+        [mArr addObject:changeBtn];
+
+        return mArr;
+    }
+    
+    return nil;
+}
+
+-(BOOL)swipeTableCell:(MGSwipeTableCell*) cell tappedButtonAtIndex:(NSInteger) index direction:(MGSwipeDirection)direction fromExpansion:(BOOL) fromExpansion{
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    FittingsCell *fCell = (FittingsCell *)cell;
+    
+    if (direction == MGSwipeDirectionRightToLeft && index == 0) {
+        if ([fCell.typeId isEqual:@(8)]) {
+            int n = 0;
+            for (int i = 0; i<[(NSArray *)self.dataSource[indexPath.section-2][@"comList"] count]; i++) {
+                if ([fCell.groupid integerValue] == [(NSNumber *)self.dataSource[indexPath.section-2][@"comList"][i][@"groupid"] integerValue]) {
+                    n++;
+                }
+            }
+            if (n <= 1) {
+                [UITools alertWithMsg:@"您不能删！！"];
+                return NO;
+            }
+            
+        }else{
+            for (NSDictionary *dic in _selectItems) {
+                if ([dic[@"id"] isEqual:fCell.typeId]) {
+                    [_selectItems removeObject:dic];
+                }
+            }
+        }
+        [self.dataSource removeObjectAtIndex:indexPath.section-2];
+        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        _showingFooter = NO;
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        _showingFooter = YES;
+//        
+//        
+//        NSMutableArray *mArr = [_dataSource[indexPath.section-2][@"comList"] mutableCopy];
+//        [mArr removeObjectAtIndex:indexPath.row];
+//        NSMutableDictionary *mDic = [_dataSource[indexPath.section-2] mutableCopy];
+//        [mDic setObject:mArr forKey:@"comList"];
+//        [_dataSource replaceObjectAtIndex:indexPath.section-2 withObject:mDic];
+//        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        
+    }else if (direction == MGSwipeDirectionRightToLeft && index == 1){
+        CarPartListController *cvc = [[CarPartListController alloc]init];
+        cvc.commplete = ^(NSDictionary *dic){
+            NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];                
+            NSMutableArray *mArr = [_dataSource[indexPath.section-2][@"comList"] mutableCopy];
+            [mArr replaceObjectAtIndex:indexPath.row withObject:dic];
+            NSMutableDictionary *mDic = [_dataSource[indexPath.section-2] mutableCopy];
+            [mDic setObject:mArr forKey:@"comList"];
+            [_dataSource replaceObjectAtIndex:indexPath.section-2 withObject:mDic];
+            
+            [self.tableView reloadData];
+        };
+        [self.navigationController pushViewController:cvc animated:YES];
+    }
+
+    return YES;
+}
+
+@end

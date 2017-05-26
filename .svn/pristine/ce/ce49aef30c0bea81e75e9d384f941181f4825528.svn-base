@@ -1,0 +1,185 @@
+//
+//  OrderWaitViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/11.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderWaitViewController.h"
+#import "OrderPayViewController.h"
+#import "OrderOutletCell.h"
+#import "OrderTypeCell.h"
+#import "OrderSelectCell.h"
+#import "FittingsCell.h"
+#import "QRCell.h"
+
+@interface OrderWaitViewController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong)UITableView *tableView;
+@property (nonatomic, strong)UIView *footerView;
+@property (nonatomic, strong)NSMutableArray *serFeeArr;
+
+@end
+
+static NSString *cellId = @"cellId";
+static NSString *outletCellId = @"outletCellId";
+static NSString *fittingCellId = @"fittingCellId";
+static NSString *typeCellId = @"typeCellId";
+static NSString *selectCellId = @"selectCellId";
+static NSString *qrCellId = @"qrCellId";
+
+@implementation OrderWaitViewController
+{
+    UILabel *_priceLabel;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setNavTitle:@"等待收货"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self configUI];
+    [self requestData];
+}
+
+- (void)requestData{
+    
+    _serFeeArr = [NSMutableArray array];
+    [[NetworkEngine sharedNetwork] postBody:@{} apiPath:nil hasHeader:YES finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+           
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+- (void)configUI{
+    [self.view addSubview:self.tableView];
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, APP_VIEW_Y, APP_WIDTH, APP_HEIGHT-
+                                                              APP_VIEW_Y)
+                                             style:UITableViewStyleGrouped];
+    [_tableView registerClass:[OrderOutletCell class] forCellReuseIdentifier:outletCellId];
+    [_tableView registerClass:[FittingsCell class] forCellReuseIdentifier:fittingCellId];
+    [_tableView registerClass:[OrderTypeCell class] forCellReuseIdentifier:typeCellId];
+    [_tableView registerClass:[OrderSelectCell class] forCellReuseIdentifier:selectCellId];
+    
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.showsVerticalScrollIndicator = NO;
+    
+    return _tableView;
+}
+
+#pragma mark - UITableViewDataSource && UITableViewDelegate
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return self.dataArr.count+3;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    if (section == 0) {
+        return CGFLOAT_MIN;
+    }else if (section > 1 && section < 2+self.dataArr.count){
+        return 40*y_6_SCALE;
+    }
+    
+    return 10*y_6_SCALE;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        return 44*y_6_SCALE;
+    }else if (indexPath.section == 1){
+        return 136*y_6_SCALE;
+    }
+    
+    return 180;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section == 0) {
+        return 1;
+    }else if (section == 1){
+        return 1;
+    }
+    
+    return 1;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    if (section>1 &&section<self.dataArr.count+2) {
+        UIView *v = [[UIView alloc]initWithFrame:CGRectMake(0, 0, tableView.width, 40)];
+        UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(10*x_6_SCALE, 0, tableView.width-10*x_6_SCALE, 40)];
+        l.text = self.dataArr[section-2][@"serName"];
+        [v addSubview:l];
+        
+        return v;
+    }
+    
+    return nil;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+        if (!cell) {
+            cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId];
+        }
+        cell.textLabel.text = @"订单编号";
+        cell.detailTextLabel.text = _orderNo;
+        
+        return cell;
+        
+    }else if (indexPath.section == 1){
+        OrderOutletCell *cell = [tableView dequeueReusableCellWithIdentifier:outletCellId];
+        if (!cell) {
+            cell = [[OrderOutletCell alloc]init];
+        }
+        
+        return cell;
+        
+    }
+//    else if (indexPath.section > 1 && indexPath.section < self.dataArr.count+2){
+//        FittingsCell *cell = [tableView dequeueReusableCellWithIdentifier:fittingCellId];
+//        if (!cell) {
+//            cell = [[FittingsCell alloc]init];
+//            
+//        }
+//        cell.jiaBtn.hidden = YES;
+//        cell.jianBtn.hidden = YES;
+//        
+//        [cell configCellWithDic:self.dataArr[indexPath.section-2][@"comList"][indexPath.row]];
+//        
+//        return cell;
+//    }
+    QRCell *cell = [tableView dequeueReusableCellWithIdentifier:qrCellId];
+    if (!cell) {
+        cell = [[QRCell alloc]init];
+    }
+    
+    cell.traN = _orderNo;
+    cell.consmueCode = _consumerCode;
+//    OrderTypeCell *cell = [tableView dequeueReusableCellWithIdentifier:typeCellId];
+//    if (!cell) {
+//        cell = [[OrderTypeCell alloc]init];
+//    }
+//    cell.name = [NSString stringWithFormat:@"%@服务:",_serFeeArr[indexPath.row][@"name"]];
+//    cell.price = [NSString stringWithFormat:@"%@",_serFeeArr[indexPath.row][@"price"]];
+    
+    return cell;
+}
+
+@end

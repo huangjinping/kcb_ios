@@ -1,0 +1,185 @@
+//
+//  OutDetailViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/11.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OutDetailViewController.h"
+#import "OutStarView.h"
+#import "OutMessView.h"
+#import "SelectMaintenanceCell.h"
+#import "OrderDeletailCell.h"
+#import "OrderCommentCell.h"
+
+@interface OutDetailViewController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong)UITableView *tableView;
+@property (nonatomic, strong)UIImageView *headerView;
+@property (nonatomic, strong)UIView *footerView;
+
+@property (nonatomic, strong)NSMutableDictionary *dataSource;
+
+@end
+
+static NSString *cellId1 = @"cellId1";
+static NSString *cellId2 = @"cellId2";
+static NSString *cellId3 = @"cellId3";
+
+@implementation OutDetailViewController
+{
+    OutStarView *_starView;
+    OutMessView *_phoneView;
+    OutMessView *_locView;
+    UIView *serviewView;
+    UIView *commentView;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setNavTitle:@"门店详情"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self configUI];
+    [self requestData];
+}
+
+- (void)requestData{
+    [[NetworkEngine sharedNetwork] postBody:@{@"merid":_merid} apiPath:kOutDetailURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+            if (!self.dataSource) {
+                self.dataSource = [NSMutableDictionary dictionary];
+            }
+            self.dataSource = [NSMutableDictionary dictionaryWithDictionary:resObj[@"body"]];
+            [self refreshHeaderV];
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+- (void)configUI{
+    [self.view addSubview:self.tableView];
+}
+
+- (void)refreshHeaderV{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",[kWebserviceUrl hasPrefix:@"http"] ? kWebserviceUrl : [NSString stringWithFormat:@"http://%@",kWebserviceUrl] ,self.dataSource[@"info"][@"logo_pic"]]];
+    [self.headerView sd_setImageWithURL:url];
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, APP_VIEW_Y, APP_WIDTH, APP_HEIGHT-APP_VIEW_Y+APP_STATUS_BAR_HEIGHT)];
+    [_tableView registerClass:[SelectMaintenanceCell class] forCellReuseIdentifier:cellId1];
+    [_tableView registerClass:[OrderDeletailCell class] forCellReuseIdentifier:cellId2];
+    
+    _tableView.tableHeaderView = self.headerView;
+    _tableView.showsVerticalScrollIndicator = NO;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    
+    return _tableView;
+}
+
+- (UIView *)headerView{
+    if (_headerView) {
+        return _headerView;
+    }
+    _headerView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 634*y_6_plus)];
+    
+    return _headerView;
+}
+
+#pragma mark UITableViewDelegate && UITableViewDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 4;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section < 3) {
+        return 1;
+    }
+    return 2;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    if (section == 2 || section == 3) {
+        return 85*y_6_plus;
+    }
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 20*y_6_plus;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0 || indexPath.section == 1) {
+        return 120*y_6_plus;
+    }
+    if (indexPath.section == 2) {
+        return 223*y_6_plus;
+    }
+    
+    return 150*y_6_plus;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    if (section == 0 || section == 1) {
+        return nil;
+    }
+    UIView *v = [[UIView alloc]initWithFrame:CGRectMake(0, 0, tableView.width, 80*y_6_plus)];
+    v.backgroundColor = kWhiteColor;
+    UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(40*x_6_plus, 0, v.width, v.height)];
+    l.font = V3_46PX_FONT;
+    l.centerY = v.boundsCenter.y;
+    if (section == 2) {
+        l.text = @"服务范围";
+    }else{
+        l.text = @"客户评价";
+    }
+    [v addSubview:l];
+    
+    return v;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0 || indexPath.section == 1) {
+        SelectMaintenanceCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId1];
+        if (!cell) {
+            cell = [[SelectMaintenanceCell alloc]init];
+        }
+        cell.nameLabel.font = V3_32PX_FONT;
+        if (indexPath.section == 0) {
+            cell.nameLabel.text = [NSString stringWithFormat:@"联系电话:%@",self.dataSource[@"info"][@"phone_no"]];
+        }else{
+            cell.nameLabel.text = self.dataSource[@"info"][@"address"];
+        }
+
+        return cell;
+    }else if (indexPath.section == 2){
+        OrderDeletailCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId2];
+        if (!cell) {
+            cell = [[OrderDeletailCell alloc]init];
+        }
+        
+        return cell;
+    }
+    
+    OrderCommentCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId3];
+    if (!cell) {
+        cell = [[OrderCommentCell alloc]init];
+    }
+    
+    return cell;
+    
+    return nil;
+}
+
+@end

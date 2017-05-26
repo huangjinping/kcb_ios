@@ -1,0 +1,97 @@
+//
+//  WaitTableViewCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by Lin_LL on 16/1/25.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "WaitTableViewCell.h"
+
+@implementation WaitTableViewCell
+{
+    UILabel *_dz;
+    UILabel *_datailLabel;
+    UIImageView *_icon;
+
+    UILabel *_tel;
+
+    
+    UILabel *_name;
+    UIView *_line2;
+    UIView *_line3;
+  
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _name = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 800*x_6_plus,50*y_6_plus )];
+        _name.font = WY_FONT_SIZE(42);
+        _name.text=@"德车型人民路店";
+        _dz.textColor=kTextBlackColor;
+        _dz = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 600*x_6_plus, 40*x_6_plus)];
+        _dz.font = WY_FONT_SIZE(32);
+        _dz.text=@"地址:";
+        _dz.textColor=kTextGrayColor;
+        _icon = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 210*x_6_plus, 210*y_6_plus)];
+        _icon.contentMode = UIViewContentModeScaleAspectFit;
+        [_icon addBorderWithWidth:1 color:kLineGrayColor];
+        
+        _tel = [[UILabel alloc] initWithFrame:CGRectMake(26*x_6_SCALE, 24*y_6_SCALE, 400*x_6_plus, 50*y_6_plus)
+                                                   text:nil
+                                                   font:WY_FONT_SIZE(32)
+                                              textColor:kTextGrayColor];
+        _tel.text=@"电话:";
+        
+        _line2 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, .5f) lineColor:kLineGrayColor];
+        _line3 = [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, .5f) lineColor:kLineGrayColor];
+    
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_tel];
+        [self.contentView addSubview:_dz];
+   
+        [self.contentView addSubview:_name];
+        [self.contentView addSubview:_line2];
+        [self.contentView addSubview:_line3];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    _icon.origin = CGPointMake(45*x_6_plus,45*y_6_plus);
+    _name.origin = CGPointMake(_icon.right+30*x_6_plus,45*y_6_plus);
+    _dz.origin=CGPointMake(_icon.right+30*x_6_plus, 0);
+    _dz.centerY = _icon.centerY;
+    _tel.frame = CGRectMake(_icon.right+30*x_6_plus, _dz.bottom+5*y_6_plus,350*x_6_plus, 120*y_6_plus);
+    _tel.numberOfLines=0;
+    _line3.origin = CGPointMake(0, self.contentView.height-1);
+    
+    
+}
+
+- (CGSize)sizeThatFits:(CGSize)size{
+    CGFloat totalHeight = 0;
+    totalHeight += [_icon sizeThatFits:size].height;
+    totalHeight += [_tel sizeThatFits:size].height;
+
+
+    
+    return CGSizeMake(size.width, totalHeight);
+}
+
+- (void)configCellWithDic:(NSDictionary *)dic{
+    _name.text = dic[@"merchantName"];
+   
+    _dz.text=[NSString stringWithFormat:@"地址 :%@",dic[@"merchantAddress"]];
+    NSURL *url = [NSURL URLWithString:dic[@"merchantImage"]];
+    [_icon sd_setImageWithURL:url placeholderImage:[UIImage imageNamed:@"暂无图片"]];
+   
+    _tel.text=[NSString stringWithFormat:@"电话 :%@",dic[@"merchantPhone"]];
+}
+
+
+
+@end

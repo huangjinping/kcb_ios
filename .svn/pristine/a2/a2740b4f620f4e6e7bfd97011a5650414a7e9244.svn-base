@@ -1,0 +1,54 @@
+//
+//  QRCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/13.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "QRCell.h"
+#import "QRCodeGenerator.h"
+
+@implementation QRCell
+{
+    UIImageView *_myQRView;
+    UILabel *_traNu;
+    UILabel *_nameLabel;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _myQRView = [[UIImageView alloc] initWithFrame:CGRectMake(APP_WIDTH-180, 0, 160, 160)];
+        _traNu = [[UILabel alloc] init];
+        _traNu.textColor = [UIColor redColor];
+        _traNu.font = FONT_BOLD_SIZE(14,x_6_SCALE);
+        _nameLabel = [[UILabel alloc]init];
+        _nameLabel.text = @"订单消费码";
+        
+        [self.contentView addSubview:_myQRView];
+        [self.contentView addSubview:_traNu];
+        [self.contentView addSubview:_nameLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _nameLabel.frame = CGRectMake(30*x_6_SCALE, 15*y_6_SCALE, 120, 22*y_6_SCALE);
+    _myQRView.frame = CGRectMake(APP_WIDTH-150*x_6_SCALE, 0, 150*x_6_SCALE, 150*x_6_SCALE);
+    _myQRView.centerY = self.contentView.boundsCenter.y;
+    _traNu.frame = CGRectMake(_nameLabel.x-17*x_6_SCALE, _nameLabel.bottom+15*y_6_SCALE, 215*x_6_SCALE, 22*y_6_SCALE);
+}
+
+- (void)setTraN:(NSString *)traN{
+    _traNu.text = traN;
+}
+
+- (void)setConsmueCode:(NSString *)consmueCode{
+    _myQRView.image = [QRCodeGenerator qrImageForString:consmueCode imageSize:_myQRView.width];
+}
+
+@end

@@ -1,0 +1,17 @@
+//
+//  OrderDetailInfoCell.h
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/27.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface OrderDetailInfoCell : UITableViewCell
+
+@property (nonatomic, strong) NSString *name;
+@property (nonatomic, strong) UIImage *img;
+@property (nonatomic, copy) void (^commplete)(void);
+
+@end

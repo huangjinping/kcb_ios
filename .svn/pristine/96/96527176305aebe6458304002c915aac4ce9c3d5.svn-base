@@ -1,0 +1,102 @@
+//
+//  MyStoreViewController.m
+//  Merchant
+//
+//  Created by Wendy on 15/12/18.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#import "MyStoreViewController.h"
+#import <HTHorizontalSelectionList/HTHorizontalSelectionList.h>
+#import "MyStoreController.h"
+#import "MapViewController.h"
+
+@interface MyStoreViewController ()<HTHorizontalSelectionListDataSource,HTHorizontalSelectionListDelegate>{
+    BOOL isEditing;
+}
+@property (nonatomic, strong) HTHorizontalSelectionList *segment;
+@property (nonatomic, strong) UIViewController *currentVC;
+@property (nonatomic, strong) MyStoreController *storeContrller;
+@property (nonatomic, strong) MapViewController *mapController;
+@end
+
+@implementation MyStoreViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self buildNavigationBar];
+    [self buildViewController];
+}
+
+- (void)buildNavigationBar{
+    self.segment = [[HTHorizontalSelectionList alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH*0.60, 40)];
+    self.segment.backgroundColor = [UIColor clearColor];
+    self.segment.delegate = self;
+    self.segment.dataSource = self;
+    self.segment.bottomTrimHidden = YES;
+    self.segment.selectionIndicatorAnimationMode = HTHorizontalSelectionIndicatorAnimationModeLightBounce;
+    
+    self.segment.selectionIndicatorColor = [UIColor whiteColor];
+    [self.segment setTitleColor:[UIColor colorWithHex:0xc0e3c4] forState:UIControlStateNormal];
+    [self.segment setTitleFont:[UIFont systemFontOfSize:16] forState:UIControlStateNormal];
+    [self.segment setTitleFont:[UIFont boldSystemFontOfSize:16] forState:UIControlStateSelected];
+    self.navigationItem.titleView = self.segment;
+}
+- (void)buildViewController{
+    self.storeContrller = [[MyStoreController alloc] init];
+    [self.storeContrller.view setFrame:self.view.frame];
+    [self addChildViewController:_storeContrller];
+    
+    self.mapController = [[MapViewController alloc] init];
+    [self.mapController.view setFrame:self.view.frame];
+    
+    //  默认,第一个视图(你会发现,全程就这一个用了addSubview)
+    [self.view addSubview:self.storeContrller.view];
+    
+    self.currentVC = self.storeContrller;
+}
+- (void)replaceController:(UIViewController *)oldController newController:(UIViewController *)newController{
+
+    [self addChildViewController:newController];
+    [self transitionFromViewController:oldController toViewController:newController duration:0.1 options:UIViewAnimationOptionTransitionCrossDissolve animations:nil completion:^(BOOL finished) {
+        
+        if (finished) {
+            [newController didMoveToParentViewController:self];
+            [oldController willMoveToParentViewController:nil];
+            [oldController removeFromParentViewController];
+            self.currentVC = newController;
+            
+        }else{
+            self.currentVC = oldController;            
+        }
+    }];
+}
+#pragma mark - HTHorizontalSelectionListDataSource Protocol Methods
+
+- (NSInteger)numberOfItemsInSelectionList:(HTHorizontalSelectionList *)selectionList {
+    return 2;
+}
+
+- (NSString *)selectionList:(HTHorizontalSelectionList *)selectionList titleForItemWithIndex:(NSInteger)index {
+    if (index == 0) {
+        return @"门店信息";
+    }else{
+        return @"门店定位";
+    }
+}
+
+#pragma mark - HTHorizontalSelectionListDelegate Protocol Methods
+- (void)selectionList:(HTHorizontalSelectionList *)selectionList didSelectButtonWithIndex:(NSInteger)index {
+    if (index == 0) {
+        [self replaceController:self.currentVC newController:self.storeContrller];
+    }else{
+        [self replaceController:self.currentVC newController:self.mapController];
+    }
+}
+
+- (void)backEvent:(UIBarButtonItem *)paramItem
+{
+    [ApplicationDelegate goBackHomeView];    
+}
+
+@end

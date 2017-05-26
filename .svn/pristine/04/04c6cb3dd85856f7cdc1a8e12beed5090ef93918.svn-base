@@ -1,0 +1,81 @@
+//
+//  CaluteView.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/21.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CaluteView.h"
+
+@implementation CaluteView
+{
+    UIButton *_JIABtn;
+    UIButton *_JIANBtn;
+    
+    UILabel *_numL;
+}
++ (CaluteView *)shareCaluteView{
+    CaluteView *cv = [[CaluteView alloc]initWithFrame:CGRectMake(0, 0, 210*x_6_plus, 70*y_6_plus)];
+        
+    return cv;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _numL = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, self.width, self.height)];
+        _numL.font = V3_22PX_FONT;
+        _numL.text = @"1";
+        _numL.textColor = [UIColor colorWithHex:0x666666];
+        _numL.textAlignment = NSTextAlignmentCenter;
+        
+        _JIABtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _JIANBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _JIABtn.frame = CGRectMake(0, 0, self.height, self.height);
+        _JIANBtn.frame = CGRectMake(self.width-self.height, 0, self.height, self.height);
+        
+        [_JIABtn setTitle:@"+"];
+        [_JIANBtn setTitle:@"-"];
+        
+        [_JIABtn setTitleColor:[UIColor colorWithHex:0x949694]];
+        [_JIANBtn setTitleColor:[UIColor colorWithHex:0x949694]];
+        
+        [_JIABtn addActionBlock:^(id weakSender) {
+            if (_block1) {
+                NSInteger n = [_numL.text integerValue];
+                _numL.text = [NSString stringWithFormat:@"%ld",(long)++n];
+                _block1([_numL.text integerValue]);
+            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        [_JIANBtn addActionBlock:^(id weakSender) {
+            NSInteger n = [_numL.text integerValue];
+            if (n > 1 && _block2) {
+                _numL.text = [NSString stringWithFormat:@"%ld",(long)--n];
+                _block2([_numL.text integerValue]);
+            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        [self addBorderWithWidth:1 color:[UIColor colorWithHex:0xdddddd]];
+        
+        UIView *line1 = [[UIView alloc]initWithFrame:CGRectMake(_JIABtn.right, 0, 1, self.height)];
+        line1.backgroundColor = [UIColor colorWithHex:0xdddddd];
+        UIView *line2 = [[UIView alloc]initWithFrame:CGRectMake(_JIANBtn.x, 0, 1, self.height)];
+        line2.backgroundColor = [UIColor colorWithHex:0xdddddd];
+        
+        [self addSubview:_numL];
+        [self addSubview:_JIABtn];
+        [self addSubview:_JIANBtn];
+        [self addSubview:line1];
+        [self addSubview:line2];
+    }
+    
+    return self;
+}
+
+- (void)setN:(NSNumber *)n{
+    _numL.text = [NSString stringWithFormat:@"%ld",(long)[n intValue]];
+}
+
+@end

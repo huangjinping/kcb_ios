@@ -1,0 +1,104 @@
+{
+    "body": [
+             {
+             "evaluationList": [
+                                {
+                                "evaluationpic": [
+                                                  {
+                                                  "evaluationId": 3,
+                                                  "id": 3,
+                                                  "url": ""
+                                                  }
+                                                  ],
+                                "id": 3,
+                                "level": "3",
+                                "orderId": "69",
+                                "status": "0",
+                                "text": "123123123123",
+                                "type": 1
+                                }
+                                ],
+             "order": {
+             "account": "cq2014",
+             "address": "北京市东城区",
+             "bookingTime": "2015-09-16 14:58:12",
+             "carModelId": "188",
+             "carModelName": "Urban款",
+             "carName": "奥迪A4L1.8T2012年产",
+             "cityCode": "0531",
+             "consumer": [
+                          {
+                          "consumerCode": "1601900316",
+                          "id": 10,
+                          "orderId": "69",
+                          "status": "2",
+                          "time": "2016-01-05 13:30:01"
+                          }
+                          ],
+             "discountPrice": 100.24,
+             "id": 69,
+             "licenseCode": "云AU336Z",
+             "merchantId": 7,
+             "name": "孙加友",
+             "orderNo": "053120160105133001237042",
+             "orderTotalPrice": 688.34,
+             "orderType": "1",
+             "payPrice": 132.56,
+             "payTime": "2015-09-16 14:58:12",
+             "payType": "1",
+             "phoneNo": "18611956385",
+             "postalCode": "274935",
+             "runTime": "2013-10-10",
+             "serviceType": "1",
+             "status": "2",
+             "submitTime": "2016-01-05 13:30:01",
+             "travelMileage": "16.5"
+             },
+             "serviceList": [
+                             {
+                             "id": 53,
+                             "orderId": 69,
+                             "orderNo": "053120160105133001237042",
+                             "serviceId": 1,
+                             "suborderdetail": [
+                                                {
+                                                "componentId": 12,
+                                                "componentName": "机油",
+                                                "componentNum": "3",
+                                                "componetBrand": "壳牌",
+                                                "dj": 1980.12,
+                                                "id": 47,
+                                                "orderNo": "053120160105133001237042",
+                                                "serviceId": 53,
+                                                "subOrderId": 48,
+                                                "volume": "3L",
+                                                "weight": "3kg"
+                                                },
+                                                {
+                                                "componentId": 13,
+                                                "componentName": "机滤  五级神",
+                                                "componentNum": "3",
+                                                "componetBrand": "阿迪达斯",
+                                                "dj": 200.02,
+                                                "id": 48,
+                                                "orderNo": "053120160105133001237042",
+                                                "serviceId": 53,
+                                                "subOrderId": 48,
+                                                "volume": "5L",
+                                                "weight": "12kg"
+                                                }
+                                                ],
+                             "workHoursPrice": 100
+                             }
+                             ]
+             }
+             ],
+    "head": {
+        "appVersion": "",
+        "dataVersion": "",
+        "deployVersion": "",
+        "msgCount": "",
+        "rspCode": "0",
+        "rspMsg": "成功"
+    }
+}

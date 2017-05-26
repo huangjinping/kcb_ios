@@ -1,0 +1,43 @@
+{
+    "body": [
+             {
+             "orderList": [
+                           {
+                           "account": "cq2014",
+                           "address": "北京市东城区",
+                           "bookingTime": "2015-09-16 14:58:12",
+                           "carModelId": "188",
+                           "carModelName": "Urban款",
+                           "carName": "奥迪A4L1.8T2012年产",
+                           "cityCode": "0531",
+                           "discountPrice": 100.24,
+                           "id": 55,
+                           "licenseCode": "云AU336Z",
+                           "merchantId": 9,
+                           "name": "孙加友",
+                           "orderNo": "053120160104095805789481",
+                           "orderTotalPrice": 688.34,
+                           "orderType": "1",
+                           "payPrice": 132.56,
+                           "payTime": "2015-09-16 14:58:12",
+                           "payType": "1",
+                           "phoneNo": "18611956385",
+                           "postalCode": "274935",
+                           "runTime": "2013-10-10",
+                           "serviceType": "1",
+                           "status": "0",
+                           "submitTime": "2016-01-04 09:58:05",
+                           "travelMileage": "16.5"
+                           }
+                           ]
+             }
+             ],
+    "head": {
+        "appVersion": "",
+        "dataVersion": "",
+        "deployVersion": "",
+        "msgCount": "",
+        "rspCode": "0",
+        "rspMsg": "成功"
+    }
+}

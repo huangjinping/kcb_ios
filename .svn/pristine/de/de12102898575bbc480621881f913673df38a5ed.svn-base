@@ -1,0 +1,32 @@
+//
+//  LocationManager.h
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/2/19.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <MAMapKit/MAMapKit.h>
+#import <AMapSearchKit/AMapSearchKit.h>
+
+typedef void(^SearchFininshDone)(NSString *,NSString *,CLLocationCoordinate2D);
+typedef void(^SearchFailedDone)(void);
+
+@interface LocationManager : NSObject
+@property (nonatomic,copy) SearchFininshDone finishBlock;
+@property (nonatomic,copy) SearchFailedDone failedBlcok;
+/*
+ 初始化 LocationManager
+ **/
++(LocationManager *)shareLocationManager;
+
+/*
+ 获取当前城市
+ **/
+-(void)getCurrentCitySearchFinishDone:(SearchFininshDone)finishBlock
+                     searchFailedDone:(SearchFailedDone)failedBlock;
+
+- (void)stopLocation;
+
+@end

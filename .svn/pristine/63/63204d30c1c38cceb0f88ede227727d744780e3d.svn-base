@@ -1,0 +1,316 @@
+//
+//  HomeViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by yanyan on 14-7-14.
+//  Copyright (c) 2014年 ___ENT___. All rights reserved.
+//
+
+#import "HomeViewController.h"
+#import "MyCarController.h"
+#import "CycleScrollView.h"
+#import "ItemsView.h"
+#import "ActivityView.h"
+#import "MyViewLayout.h"
+#import "ItemViewCell.h"
+#import "ServiceCell.h"
+
+/////////////
+
+
+#import "CarInfoScrollView.h"
+#import "HomeWeatherView.h"
+#import "TestNetworkViewController.h"
+#import "ZhaohuiViewController.h"
+#import "InformationCenterListViewController.h"
+#import "ZijiayouViewController.h"
+#import "ScanViewController.h"
+#import "BaoyangSelectCarViewController.h"
+#import "BaoxianSelectCarViewController.h"
+#import "BaiduMobAdView.h"
+#import "BaiduMobSspBannerDelegateProtocol.h"
+#import "BaiduMobSspBannerView.h"
+#import "MyAFNetWorkingRequest.h"
+#import "SHModel.h"
+#import "BaoYangModel.h"
+#import "InfoTableViewCell.h"
+#import "InfoViewController.h"
+#import "UserCarViewController.h"
+
+@interface HomeViewController ()<
+MenuViewDelegate,
+CarInfoScrollViewDelegate,
+DriverViewDelegate,
+AdvertisementImageViewDelegate,
+UIAlertViewDelegate,
+UIImagePickerControllerDelegate,
+UINavigationControllerDelegate,
+BaiduMobSspDelegate,
+UITableViewDataSource,
+UITableViewDelegate,
+ItemViewDelegate,
+ActivityViewDelegate
+>
+
+@property (nonatomic, strong)UIScrollView *scrollView;
+@property (nonatomic, strong)UITableView *tableView;
+@property (nonatomic, strong)NSMutableArray *serviceData;
+@end
+
+@implementation HomeViewController
+{
+    UIView *_locationView;
+    UIView *_msgView;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self requestData];
+    [self configUI];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden = NO;
+
+    [self setBackButtonHidden:YES];
+    [self setCustomNavigationTitle:@"开车邦"];
+    [self loadNavComponents];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [self rmNavComponents];
+}
+
+#pragma mark -
+
+- (void)configUI{
+    CGFloat y = 0;
+    y += [self createHeaderView:y];
+    y += [self createMiddleView:y];
+    [self createBottomView:y];
+    [self.scrollView autoContentSize];
+}
+
+- (CGFloat)createHeaderView:(CGFloat)y{
+    [self.view addSubview:self.scrollView];
+    CycleScrollView *cv = [[CycleScrollView alloc]initWithFrame:CGRectMake(0, 0, self.view.width, 120*y_6_SCALE) cycleDirection:CycleScrollDirectionHorizontal pictures:nil didScrollBlock:^(NSInteger index) {
+        
+    }];
+    CircleScrollPictureModel *model0 = [[CircleScrollPictureModel alloc]init];
+    model0.imageUrl = @"http://pic2.ooopic.com/01/03/51/25b1OOOPIC19.jpg";
+    
+    CircleScrollPictureModel *model1 = [[CircleScrollPictureModel alloc]init];
+    model1.imageUrl = @"http://pic14.nipic.com/20110522/7411759_164157418126_2.jpg";
+    
+    CircleScrollPictureModel *model2 = [[CircleScrollPictureModel alloc]init];
+    model2.imageUrl = @"http://img.taopic.com/uploads/allimg/130501/240451-13050106450911.jpg";
+    
+    CircleScrollPictureModel *model3 = [[CircleScrollPictureModel alloc]init];
+    model3.imageUrl = @"http://pica.nipic.com/2008-03-19/2008319183523380_2.jpg";
+    
+    cv.imageArray = @[model0,model1,model2,model3];
+    [self.scrollView addSubview:cv];
+    
+    return cv.height;
+}
+
+- (CGFloat)createMiddleView:(CGFloat)y{
+    ItemsView *itemV = [ItemsView shareWithItems:@[@"常规保养",@"超值洗车",@"换轮胎",
+                                                   @"救援",@"旧车评价"]
+                                        pictures:@[@"常规保养",@"超值洗车",@"换轮胎",
+                                                   @"救援",@"旧车评价"]
+                                     lineSpacing:10*x_5_SCALE
+                                     itemSpacing:40*x_6_SCALE
+                                      edgeInsets:UIEdgeInsetsMake(12*y_6_SCALE, 30*x_6_SCALE, 12*y_6_SCALE, 0)];
+    itemV.delegate = self;
+    itemV.origin = CGPointMake(0, y);
+    [self.scrollView addSubview:itemV];
+    
+    ActivityView *av = [[ActivityView alloc]initWithFrame:CGRectMake(0, itemV.bottom, self.view.width, 262*y_6_SCALE)];
+    av.delegate = self;
+    av.backgroundColor = [UIColor whiteColor];
+    [self.scrollView addSubview:av];
+    
+    return itemV.height+av.height;
+}
+
+- (void)createBottomView:(CGFloat)y{
+    self.tableView.origin = CGPointMake(0, y);
+    self.serviceData = [@[@"",@"",@"",@""] mutableCopy];
+    [self.scrollView addSubview:self.tableView];
+}
+
+- (void)setServiceData:(NSMutableArray *)serviceData{
+    _serviceData = serviceData;
+    self.tableView.size = CGSizeMake(APP_WIDTH, self.tableView.rowHeight*serviceData.count+38*y_6_SCALE);
+    [self.tableView reloadData];
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]init];
+    [_tableView registerNib:[UINib nibWithNibName:@"ServiceCell" bundle:nil] forCellReuseIdentifier:@"serviceCellId"];
+    _tableView.rowHeight = 110;
+    _tableView.showsVerticalScrollIndicator = NO;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    
+    return _tableView;
+}
+
+- (UIScrollView *)scrollView{
+    if (_scrollView) {
+        return _scrollView;
+    }
+    _scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, APP_NAV_HEIGHT+APP_STATUS_BAR_HEIGHT, APP_WIDTH, APP_HEIGHT-APP_NAV_HEIGHT-APP_TAB_HEIGHT)];
+    _scrollView.showsVerticalScrollIndicator = NO;
+    _scrollView.backgroundColor = [UIColor whiteColor];
+    
+    return _scrollView;
+}
+
+- (void)loadNavComponents{
+    
+    _locationView = [[UIView alloc] initWithFrame:CGRectMake(30*PX_X_SCALE, 0, (60 + 50)*PX_X_SCALE, _navigationImgView.height)];
+    [_navigationImgView addSubview:_locationView];
+    UITapGestureRecognizer *locaitonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapSetCity:)];
+    [_locationView addGestureRecognizer:locaitonTap];
+    
+    UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, (_locationView.height - 40*PX_X_SCALE)/2, 40*PX_X_SCALE, 40*PX_X_SCALE)];
+    [imgView setImage:[UIImage imageNamed:@"location_logo_white"]];
+    [imgView setUserInteractionEnabled:YES];
+    [_locationView addSubview:imgView];
+    UILabel *cityL = [[UILabel alloc] initWithFrame:CGRectMake(imgView.right + 10*PX_X_SCALE, 0, 100*PX_X_SCALE, _locationView.height)];
+    [cityL convertNewLabelWithFont:FONT_NOMAL textColor:[UIColor whiteColor] textAlignment:NSTextAlignmentLeft];
+    NSString *cityName  = [[NSUserDefaults standardUserDefaults] objectForKey:KEY_CITY_NAME_IN_USERDEFAULT];
+    if ([cityName isEqualToString:@""]) {
+        cityL.text = @"...";
+        [self tapSetCity:nil];
+    }else{
+        cityL.text = cityName;
+        [[NSUserDefaults standardUserDefaults] setObject:cityName forKey:@"zhuanshu"];
+    }
+    [_locationView addSubview:cityL];
+    
+    
+    UIButton *carTypeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    carTypeBtn.frame = CGRectMake(self->_navigationImgView.width-10*x_6_SCALE-30*x_6_SCALE, 0, 30*x_6_SCALE, 20*y_6_SCALE);
+    carTypeBtn.centerY = self->_navigationImgView.boundsCenter.y;
+    [carTypeBtn setBackgroundImage:[UIImage imageNamed:@"car"] forState:UIControlStateNormal];
+    [self->_navigationImgView addSubview:carTypeBtn];
+    
+    [carTypeBtn addActionBlock:^(id weakSender) {
+        if (![[[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId] count]) {
+            if (!APP_DELEGATE.loginSuss) {
+                [self goToLoginPage];
+                return ;
+            }
+            CarBindViewController *cvc = [[CarBindViewController alloc]init];
+            [self.navigationController pushViewController:cvc animated:YES];
+            
+            return ;
+        }
+        MyCarController *mvc = [[MyCarController alloc]init];
+                [self.navigationController pushViewController:mvc animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+    
+//    [_msgView addSubview:carTypeBtn];
+}
+
+- (void)rmNavComponents{
+    [_locationView removeFromSuperview];
+    _locationView = nil;
+    [_msgView removeFromSuperview];
+    _msgView = nil;
+}
+
+#pragma mark - network method
+- (void)requestData{
+    [[NetworkEngine sharedNetwork] postBody:@{@"vin":@""} apiPath:kVINCarMessageURL hasHeader:NO finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+            NSLog(@"===%@",resObj);
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+#pragma mark - event method
+- (void)tapSetCity:(UITapGestureRecognizer*)tap{
+    CitySetViewController *setCityVC = [[CitySetViewController alloc] init];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:setCityVC];
+    if (iOS7) {
+        UIView *statusBarView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, APP_WIDTH, 20)];
+        statusBarView.backgroundColor = COLOR_NAV;
+        [nav.navigationBar addSubview:statusBarView];
+    }
+    [self.navigationController presentViewController:nav animated:YES completion:nil];
+}
+
+#pragma mark - Baidu iad Delegate
+- (NSString *)baiduMobSspApplicationKey{
+    return  @"2083889";
+}
+
+#pragma mark - ItemsViewDelegate && ActivityViewDelegate
+- (void)ItemsView:(ItemsView *)ItemsView didSelectedItemAtPath:(NSInteger)path{
+    if (!APP_DELEGATE.loginSuss) {
+        [self goToLoginPage];
+        return ;
+    }
+    BasicViewController *vc = [[BasicViewController alloc]init];
+    switch (path) {
+        case BusinessMaintenace:
+            if (![[DataBase sharedDataBase] selectCarByUserId:APP_DELEGATE.userId].count) {
+                vc = [[CarBindViewController alloc]init];
+                break;
+            }else{
+                vc = [[MaintenanceController alloc]init];
+            }
+            break;
+        case BusinessWashCar:
+            
+        default:
+            break;
+    }
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)activityView:(ActivityView *)activityView DidSelectItemAtPath:(NSInteger)path{
+    
+}
+
+#pragma mark - UITableViewDelegate && UITableViewDataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return _serviceData.count;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UIView *headerV = [[UIView alloc]init];
+    UILabel *l = [[UILabel alloc]initWithFrame:CGRectMake(10, 0, APP_WIDTH, 38*y_6_SCALE)];
+    l.text = @"金牌服务";
+    l.font = FONT_SIZE(15, x_6_SCALE);
+    l.textColor = [UIColor redColor];
+    [headerV addSubview:l];
+    
+    return headerV;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 38*y_6_SCALE;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ServiceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"servieCellId"];
+    if (!cell) {
+        cell = [[NSBundle mainBundle] loadNibNamed:@"ServiceCell" owner:nil options:nil][0];
+    }
+    return cell;
+}
+
+@end

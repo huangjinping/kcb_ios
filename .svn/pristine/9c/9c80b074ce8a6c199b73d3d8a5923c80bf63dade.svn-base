@@ -1,0 +1,54 @@
+
+//
+//  CarModelController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/8.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CarModelController.h"
+
+@interface CarModelController ()
+
+@end
+
+@implementation CarModelController
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"车型列表"];
+}
+
+- (void)viewDidLoad{
+    [super viewDidLoad];
+    [self requestData];
+}
+
+- (void)requestData{
+    [[NetworkEngine sharedNetwork] postBody:@{@"seriesID":_seriesID,@"nkvalue":_nkvalue,@"pqvalue":_pqlvalue} apiPath:kCarModelLsitURL hasHeader:NO finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {  
+            [self.dataSource addObjectsFromArray:resObj[@"body"][0][@"carmodellist"]];
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+- (void)configCell:(UITableViewCell *)cell indexPath:(NSIndexPath *)index{
+    cell.textLabel.text = self.dataSource[index.row][@"carModelsName"];
+    cell.textLabel.font = V3_36PX_FONT;
+    cell.textLabel.textColor = [UIColor colorWithHex:0x666666];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return CGFLOAT_MIN;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPostCarModelAdded object:self.dataSource[indexPath.row]];
+    [self.navigationController popToViewController:self.navigationController.viewControllers[1] animated:YES];
+}
+
+@end

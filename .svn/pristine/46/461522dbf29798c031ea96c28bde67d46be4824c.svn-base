@@ -1,0 +1,79 @@
+
+
+//
+//  ActivityView.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 15/12/25.
+//  Copyright © 2015年 ___ENT___. All rights reserved.
+//
+
+#import "ActivityView.h"
+#import "ActivityLayout.h"
+#import "ActivityCell.h"
+
+@interface ActivityView ()<UICollectionViewDataSource,UICollectionViewDelegate>
+
+@end
+
+static NSString *cellId = @"cellId";
+
+@implementation ActivityView
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _dataSource = @[@{@"name":@"无违章幸运罗盘",@"subname":@"一年没有违章吗，快来领奖吧",@"icon":@"lp"},@{@"name":@"秒杀时刻",@"subname":@"一元疯狂开奖",@"icon":@"lp"},@{@"backImg":@"bg"}];
+        self.backgroundColor = [UIColor whiteColor];
+        ActivityLayout *layout = [[ActivityLayout alloc]init];
+        UICollectionView *collectionView = [[UICollectionView alloc]initWithFrame:self.bounds collectionViewLayout:layout];
+        collectionView.backgroundColor = [UIColor lightGrayColor];
+        [collectionView registerClass:[ActivityCell class] forCellWithReuseIdentifier:cellId];
+        
+        collectionView.delegate = self;
+        collectionView.dataSource = self;
+        [self addSubview:collectionView];
+    }
+    
+    return self;
+}
+
+#pragma mark - UICollectionViewDelegate && UIcollectionViewDataSource
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    return 3;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    ActivityCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellId forIndexPath:indexPath];
+    if (!cell) {
+        cell = [[ActivityCell alloc]init];
+    }
+    [cell configCellWithDic:self.dataSource[indexPath.item]];
+    
+    return cell;
+}
+
+-(BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath{
+    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
+    [UIView animateWithDuration:.2 animations:^{
+        cell.transform = CGAffineTransformMakeScale(0.98f, 0.98f);
+    }];
+    
+    return YES;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    if ([self.delegate respondsToSelector:@selector(activityView:DidSelectItemAtPath:)]) {
+        [self.delegate activityView:self DidSelectItemAtPath:indexPath.item];
+    }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath{
+    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
+    [UIView animateWithDuration:.2 animations:^{
+        cell.transform = CGAffineTransformIdentity;
+    }];
+}
+
+@end

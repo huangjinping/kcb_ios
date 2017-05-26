@@ -1,0 +1,146 @@
+//
+//  OrderInquiryController.m
+//  Merchant
+//
+//  Created by Wendy on 16/1/4.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "OrderInquiryController.h"
+#import "CustomTextField.h"
+#import "CustomInputView.h"
+#import "YZKSelectTableView.h"
+#import "DateSelectView.h"
+
+typedef NS_ENUM(NSInteger, ButtonType) {
+    SeletctEventStatus = 21,
+    SeletctEventAppraise
+};
+
+@interface OrderInquiryController ()<YZKSelectTableViewDelegate>@property (nonatomic,strong) UITextField *orderTextfiled;
+@property (nonatomic,strong) CustomInputView *startTime;
+@property (nonatomic,strong) CustomInputView *endTime;
+@property (nonatomic,strong) CustomInputView *appointmentTime;
+@property (nonatomic,strong) CustomInputView *statusTime;
+@property (nonatomic,strong) CustomInputView *appraiseTime;
+@property (nonatomic,strong) NSArray *statusArray;
+@property (nonatomic,strong) NSArray *appraiseArray;
+
+@end
+
+@implementation OrderInquiryController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self setNavTitle:@"订单查询"];
+    // Do any additional setup after loading the view.
+    self.view.backgroundColor = kColorBackgroud;
+    [self buildUI];
+    [self buildData];
+}
+- (void)buildData{
+    self.statusArray = @[@"待确认",@"待服务",@"已完成",@"已评价",@"已取消",@"退款中",@"已退款"];
+    self.appraiseArray = @[@"好",@"中",@"差"];
+}
+- (void)buildUI{
+    UIView *topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 65)];
+    topView.backgroundColor = RGB(249, 249, 249);
+    _orderTextfiled = [[UITextField alloc]initWithFrame:CGRectMake(25,15 , APP_WIDTH-50, 35)];
+    _orderTextfiled.placeholder = @"请输入订单号";
+    [topView addSubview:_orderTextfiled];
+    _orderTextfiled.borderStyle = UITextBorderStyleRoundedRect;
+    [self.view addSubview:topView];
+    
+    UIView *bottomView =  [[UIView alloc] initWithFrame:CGRectMake(0, topView.bottom+10, APP_WIDTH, 200)];
+    bottomView.backgroundColor = RGB(249, 249, 249);
+    CGFloat cellHeigth = 40;
+    //开始时间
+    __weak __typeof(self)weakSelf = self;
+
+    _startTime = [[CustomInputView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, cellHeigth) title:@"开始时间：" placeholder:@"" value:@""];
+    _startTime.commplete = ^{
+        [[DateSelectView sharedDateSelectView] showWithCompletion:^(NSDate *date)
+         {
+             NSString *text = [date stringWithDateFormat:DateFormatWithDateAndMinite];
+             [weakSelf.startTime setTextField:text];
+         }];
+
+    };
+
+    [bottomView addSubview:_startTime];
+
+    
+    //结束时间
+    _endTime = [[CustomInputView alloc] initWithFrame:CGRectMake(0, _startTime.bottom, APP_WIDTH, cellHeigth) title:@"结束时间：" placeholder:@"" value:@""];
+    _endTime.commplete = ^{
+        [[DateSelectView sharedDateSelectView] showWithCompletion:^(NSDate *date)
+         {
+             NSString *text = [date stringWithDateFormat:DateFormatWithDateAndMinite];
+             [weakSelf.endTime setTextField:text];
+         }];
+
+    };
+
+    [bottomView addSubview:_endTime];
+
+    //预约时间
+    _appointmentTime = [[CustomInputView alloc]initWithFrame:CGRectMake(0, _endTime.bottom, APP_WIDTH, cellHeigth) title:@"预约时间：" placeholder:@"" value:@""];
+    _appointmentTime.commplete = ^{
+        [[DateSelectView sharedDateSelectView] showWithCompletion:^(NSDate *date)
+         {
+             NSString *text = [date stringWithDateFormat:DateFormatWithDateAndMinite];
+             [weakSelf.appointmentTime setTextField:text];
+         }];
+
+    };
+    [bottomView addSubview:_appointmentTime];
+
+    //订单状态
+    _statusTime = [[CustomInputView alloc]initWithFrame:CGRectMake(0, _appointmentTime.bottom, APP_WIDTH, cellHeigth) title:@"订单状态：" placeholder:@"" value:@""];
+    _statusTime.commplete = ^{
+        
+        YZKSelectTableView *popview = [[YZKSelectTableView alloc] initWithTitle:nil dataArray:weakSelf.statusArray delegate:weakSelf  selectedIndex:0];
+        popview.tag = SeletctEventStatus;
+        [popview showWithView:weakSelf.view];
+        
+    };
+
+    [_statusTime setRightImage:@"right_arrow"];
+    [bottomView addSubview:_statusTime];
+    
+    //评价状态
+    _appraiseTime = [[CustomInputView alloc] initWithFrame: CGRectMake(0, _statusTime.bottom, APP_WIDTH, cellHeigth)title:@"评价状态：" placeholder:@"" value:@"待评价"];
+    [_appraiseTime setRightImage:@"right_arrow"];
+    _appraiseTime.commplete = ^{
+        
+        YZKSelectTableView *popview = [[YZKSelectTableView alloc] initWithTitle:nil dataArray:weakSelf.appraiseArray delegate:weakSelf  selectedIndex:0];
+        popview.tag = SeletctEventAppraise;
+        [popview showWithView:weakSelf.view];
+        
+    };
+    [bottomView addSubview:_appraiseTime];
+    [self.view addSubview:bottomView];
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+#pragma mark - popview代理
+- (void)selectTableView:(YZKSelectTableView *)selectTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (selectTableView.tag == SeletctEventStatus) {
+        [_statusTime setTextField:self.statusArray[indexPath.row]];
+    }else if(selectTableView.tag == SeletctEventAppraise){
+        [_appraiseTime setTextField:self.appraiseArray[indexPath.row]];
+    }
+}
+@end

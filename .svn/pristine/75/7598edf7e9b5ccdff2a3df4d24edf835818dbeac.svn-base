@@ -1,0 +1,62 @@
+{
+    "body":{
+        "myBill":[
+                  {
+                  "carName":"大吉普子",
+                  "id":"148",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"51.17",
+                  "successTime":"2015-12-02 13:13:13"
+                  },
+                  {
+                  "carName":"劳斯莱斯",
+                  "id":"158",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"60.17",
+                  "successTime":"2015-12-01 13:13:13"
+                  },
+                  {
+                  "carName":"兰博基尼",
+                  "id":"168",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"60.17",
+                  "successTime":"2015-12-01 13:13:13"
+                  },
+                  {
+                  "carName":"劳斯莱斯",
+                  "id":"178",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"60.17",
+                  "successTime":"2016-02-01 13:13:13"
+                  },
+                  {
+                  "carName":"法拉利",
+                  "id":"128",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"60.17",
+                  "successTime":"2015-11-01 13:13:13"
+                  },
+                  {
+                  "carName":"法拉利奥迪A3",
+                  "id":"118",
+                  "orderNo":"B01020160122114058248699",
+                  "serviceName":"自助保养",
+                  "sr":"600.98",
+                  "successTime":"2015-11-01 13:13:13"
+                  }
+                  ]
+    },
+    "head":{
+        "appVersion":"",
+        "dataVersion":"",
+        "deployVersion":"",
+        "msgCount":"",
+        "rspCode":"0",
+        "rspMsg":"成功"
+    }
+}

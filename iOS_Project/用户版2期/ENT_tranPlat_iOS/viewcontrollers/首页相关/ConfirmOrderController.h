@@ -1,0 +1,32 @@
+//
+//  ConfirmOrderController.h
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/5.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "BasicViewController.h"
+#import "FittingsCell.h"
+#import "HCarModel.h"
+
+@interface ConfirmOrderController : BasicViewController
+
+@property (nonatomic, strong)NSArray *dataArr;
+@property (nonatomic, strong)NSString *serids;           //服务项ID
+@property (nonatomic, assign)CGFloat totalPrice;         //订单总价
+@property (nonatomic, strong)NSString *bookingTime;      //预约时间
+@property (nonatomic, strong)NSString *merchantId;       //选定商户ID
+@property (nonatomic, strong)HCarModel *carModel;        //车型信息
+@property (nonatomic, strong)NSString *merchantName;     //商铺名称
+@property (nonatomic, strong)NSString *merchantPhone;    //商户电话
+@property (nonatomic, strong)NSString *merchantMoible;   //商户座机
+@property (nonatomic, strong)NSString *merchantAddress;  //商户地址
+@property (nonatomic, strong)NSString *merchantDistance; //商户当前距离
+@property (nonatomic, strong)NSString *chanelId;         //配件商Id
+@property (nonatomic, strong)NSString *merchantImage;    //商户头像
+@property (nonatomic, strong)NSNumber *score;            //商户星级
+
+@property (nonatomic, strong)NSDictionary *chantInfo;    //供应商信息
+
+@end

@@ -1,0 +1,18 @@
+//
+//  ColorConfig.h
+//  Merchant
+//
+//  Created by Wendy on 15/12/16.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#ifndef ColorConfig_h
+#define ColorConfig_h
+
+//navigationBar
+#define kOrangeBarTintColor [UIColor colorWithHex:0xe95412]
+
+#define kNavigationBarColor [UIColor colorWithHex:0x39b44a]
+
+#define COLOR_VIEW_CONTROLLER_BG    [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1]
+#endif /* ColorConfig_h */

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>01288E29-0BD5-4F73-8254-9B09C865C5D4</string>
+	<key>IDESourceControlProjectName</key>
+	<string>ENT_tranPlat_iOS</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>87B236F5-FB5B-4613-85CD-DFCD0CCC16B4</key>
+		<string>https://132.96.77.10/svn/TranPlat/_TranPlat_iOS</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>ENT_tranPlat_iOS/ENT_tranPlat_iOS.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>87B236F5-FB5B-4613-85CD-DFCD0CCC16B4</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+		<key>87B236F5-FB5B-4613-85CD-DFCD0CCC16B4</key>
+		<string>https://132.96.77.10/svn/TranPlat</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://132.96.77.10/svn/TranPlat/_TranPlat_iOS/ENT_tranPlat_iOS/ENT_tranPlat_iOS.xcodeproj</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>87B236F5-FB5B-4613-85CD-DFCD0CCC16B4</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>87B236F5-FB5B-4613-85CD-DFCD0CCC16B4</string>
+			<key>IDESourceControlWCCName</key>
+			<string>_TranPlat_iOS_</string>
+		</dict>
+	</array>
+</dict>
+</plist>

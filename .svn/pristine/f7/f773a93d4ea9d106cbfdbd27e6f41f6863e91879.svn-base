@@ -1,0 +1,21 @@
+//
+//  BaseTableViewController.h
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/6.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "BaseViewController.h"
+
+@interface BaseTableViewController : BaseViewController<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) NSMutableArray *dataSource;
+@property (nonatomic, assign) UITableViewStyle style;
+
+- (void)requestData;
+
+- (void)configCell:(UITableViewCell *)cell indexPath:(NSIndexPath*)index;
+
+@end

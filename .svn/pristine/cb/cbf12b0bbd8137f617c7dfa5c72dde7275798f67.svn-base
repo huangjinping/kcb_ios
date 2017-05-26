@@ -1,0 +1,508 @@
+//
+//  ServiceSettingController.m
+//  Merchant
+//
+//  Created by Wendy on 15/12/18.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#import "ServiceSettingController.h"
+#import "ServiceSettingCell.h"
+#import "MESettingList.h"
+#import <MJExtension.h>
+#import <MJRefresh.h>
+#import "CustomSectionInfo.h"
+#import "CustomSectionView.h"
+#import "CustomMJRefreshGifHeader.h"
+
+@interface ServiceSettingController ()<UITableViewDelegate,UITableViewDataSource,UIAlertViewDelegate,CustomSectionViewDelegate>{
+    NSMutableArray *settingArray;
+    NSIndexPath *currentIndexPath;
+    NSMutableArray *sectionDataSource;
+    NSInteger openedSection;
+    NSInteger operation;//0:开关 1:直接编辑工时
+}
+
+@property (nonatomic,strong)UITableView *tableView;
+@end
+
+@implementation ServiceSettingController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    openedSection = 0;
+    sectionDataSource = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, self.view.height - APP_TAB_HEIGHT- APP_NAV_HEIGHT) style:UITableViewStyleGrouped];
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.tableView registerClass:[ServiceSettingCell class] forCellReuseIdentifier:@"ServiceSettingCell"];
+    [self.view addSubview:self.tableView];
+    [self setNavTitle:@"服务设置"];
+    self.navigationItem.leftBarButtonItem = nil;
+        
+    self.tableView.mj_header = [CustomMJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestServiceSetting)];
+    
+    // Do any additional setup after loading the view.
+    [self requestServiceSetting];
+}
+- (void)requestServiceSetting{
+    NSInteger merid = ApplicationDelegate.shareLoginData.userdata.mid;
+    NSDictionary *param = @{@"merid":[NSNumber numberWithInteger:merid].stringValue};
+    [AFNHttpRequest afnHttpRequestUrlNonHub:kHttpSettingList param:param success:^(id responseObject){
+        [self.tableView.mj_header endRefreshing];
+        if (kRspCode(responseObject) == 0) {
+            NSArray *settingList = responseObject[@"body"][@"settingList"];
+            settingArray = [MESettingList mj_objectArrayWithKeyValuesArray:settingList];
+            [self dealSectionDatasource];
+            [self dealSectionStatus];
+            [self.tableView reloadData];
+        }
+    } failure:^(NSError *error) {
+        [self.tableView.mj_header endRefreshing];
+    } view:self.view];
+}
+- (void)dealSectionDatasource{
+    [sectionDataSource removeAllObjects];
+    for (int i=0; i<settingArray.count; i++) {
+        NSMutableArray *indexPaths = [[NSMutableArray alloc] initWithCapacity:0];
+        MESettingList *item = settingArray[i];
+        for (int j = 0; j < item.lm.count; j++) {
+            NSIndexPath * path = [NSIndexPath indexPathForItem:j inSection:i];
+            [indexPaths addObject:path];
+        }
+        CustomSectionInfo *info = [[CustomSectionInfo alloc] initWithTitle:item.name open:(i == openedSection) infoArray:item.lm indexPaths:indexPaths];
+        [sectionDataSource addObject:info];
+
+    }
+}
+- (void)dealSectionStatus{
+    for (MESettingList *item in settingArray) {
+        item.on = NO;
+        for (Lm *lm in item.lm) {
+            if (lm.mid.length > 0) {
+                item.on = YES;
+                lm.type = @"open";
+            }else{
+                lm.type = @"close";
+            }
+        }
+    }
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+-(void)showAalert:(NSString *)msg{
+    NSString *alert=[NSString stringWithFormat:@"请输入%@工时费,且不能为0",msg];
+    [UIHelper showText:alert ToView:self.view];
+}
+
+
+
+- (void)editServiceSetting:(UISwitch *)sender
+{
+    
+    /*
+     "mid": "56",主键    类型String
+     "type":"close",  操作类型 close为关闭,open为打开  类型String
+     "price": "123.00",服务价格  类型String
+     "sid": 4 服务ID 类型Long
+     
+     
+     "merid": "",
+     "mid": "",
+     "name": "更换雨刷",
+     "price": "",
+     "sid": 5
+     */
+    
+    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:0];
+    for (MESettingList *item in settingArray) {
+        NSLog(@"%@",item);
+        for (Lm *lm in item.lm) {
+            if (lm) {
+                if (lm.mid.length > 0) {
+                    [array addObject:lm];
+                }else if([lm.type isEqualToString:@"open"]){
+                    [array addObject:lm];
+                }
+                
+                if ([lm.type isEqualToString:@"open"]&&(lm.price.floatValue == 0)) {
+                    [self showAalert:lm.name];
+                    return;
+                }
+                
+            }else{
+                
+            }
+        }
+    }
+    if (array.count == 0) {
+        return;
+    }
+    
+    
+    NSInteger merid = ApplicationDelegate.shareLoginData.userdata.mid;
+    NSDictionary *param = @{@"merid":[NSNumber numberWithInteger:merid].stringValue,@"settingList":[Lm mj_keyValuesArrayWithObjectArray:array ]};
+    [AFNHttpRequest afnHttpRequestUrl:kHttpSetting param:param success:^(id responseObject) {
+        if(kRspCode(responseObject) == 0){
+            ApplicationDelegate.tabBarController.needSettingManHour = NO;
+            [self requestServiceSetting];
+            [UIHelper alertWithMsg:@"保存成功"];
+        }else{
+            [UIHelper alertWithMsg:kRspMsg(responseObject)];
+            if (operation == 0) {
+                sender.on = !sender.on;
+            }
+        }
+    } failure:^(NSError *error) {
+        [UIHelper alertWithMsg:kNetworkErrorDesp];
+        if (operation == 0) {
+            sender.on = !sender.on;
+        }
+
+    } view:self.view];
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 44;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    CustomSectionInfo *info = [sectionDataSource objectAtIndex:section];
+    __autoreleasing CustomSectionView *secHeaderView = [[CustomSectionView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 44) title:info.sectionTitle section:section opened:info.open delegate:self showArrow:info.infoArray.count ? YES:NO];
+    
+    return secHeaderView;
+
+    
+    MESettingList *item = settingArray[section];
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 44)];
+    view.backgroundColor = [UIColor whiteColor];
+    view.tag = section;
+    UILabel *titleLab = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, 100, 44)];
+    titleLab.text = item.name;
+    titleLab.textColor = RGB(76, 76, 76);
+    titleLab.font = V3_42PX_FONT;
+    [view addSubview:titleLab];
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tableSectionViewTapped:)];
+    [view addGestureRecognizer:tapGesture];
+
+//    UISwitch *switchControl = [[UISwitch alloc] init];
+//    switchControl.left = view.width - 80;
+//    switchControl.on = item.on;
+//    switchControl.centerY = view.centerY;
+//    switchControl.tag = section;
+//    [switchControl addTarget:self action:@selector(sectionSwitchValueChanged:) forControlEvents:UIControlEventValueChanged];
+    
+//    [view addSubview:switchControl];
+    [view addLineWithFrame:CGRectMake(0, 43, APP_WIDTH, 1) lineColor:[UIColor lightGrayColor]];
+    
+    return view;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+//    if ([self currentStatusByIndexPath:indexPath]) {
+//        return 80;
+//    }
+    return 44;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+//    return settingArray.count;
+    return sectionDataSource.count;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+//    MESettingList *item = settingArray[section];
+//    return item.lm.count;
+    
+    CustomSectionInfo *info = [sectionDataSource objectAtIndex:section];
+    
+    if (info.open) {
+        return [info.infoArray count];
+    }
+    
+    return 0;
+
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"ServiceSettingCell";
+    ServiceSettingCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    
+    if (cell == nil) {
+        cell = [[ServiceSettingCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                         reuseIdentifier:identifier];
+
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+
+
+//    MESettingList *item = settingArray[indexPath.section];
+//    Lm * info = item.lm[indexPath.row];
+
+    NSInteger section = indexPath.section;
+    CustomSectionInfo *item = [sectionDataSource objectAtIndex:section];
+    Lm *info = [item.infoArray objectAtIndex:indexPath.row];
+
+
+    cell.titleLab.text = info.name;
+    [cell setIconImageWithSid:info.sid];
+    
+    cell.switchCtrl.on = [self currentStatusByIndexPath:indexPath];
+    [cell setManHourLabel:info.price];
+//    cell.manHourTF.text = info.price;
+//    cell.manHourTF.tag = [self getTagByIndexPath:indexPath];
+//    
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldDidChange:) name:UITextFieldTextDidChangeNotification object:cell.manHourTF];
+    
+    cell.switchCtrl.tag = [self getTagByIndexPath:indexPath];
+    
+//    if (![self currentStatusByIndexPath:indexPath]) {
+//        [cell setCellBottom:YES];
+//    }else{
+//        [cell setCellBottom:NO];
+//    }
+    
+    [cell.switchCtrl addTarget:self action:@selector(switchValueChanged:) forControlEvents:UIControlEventValueChanged];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    ServiceSettingCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    if (cell.switchCtrl.on) {
+        operation = 1;
+        UIAlertView *inputAlertView = [[UIAlertView alloc] initWithTitle:@"请输入工时费" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"确定", nil];
+        inputAlertView.alertViewStyle = UIAlertViewStylePlainTextInput;
+        [inputAlertView show];
+        currentIndexPath = indexPath;
+    }
+}
+//- (void)textFieldDidChange:(NSNotification *)notife{
+//    UITextField *textField = notife.object;
+//    NSIndexPath *indexPath = [self getIndexPathByTag:textField.tag];
+//    MESettingList *item = settingArray[indexPath.section];
+//    Lm *im = item.lm[indexPath.row];
+//    im.price = textField.text;
+//    
+//    //同时修改sectiondatasource的值
+//    
+//    
+//}
+- (NSInteger)getTagByIndexPath:(NSIndexPath *)indexPath{
+    NSInteger section = indexPath.section;
+    NSInteger row = indexPath.row;
+    NSInteger retTag = section * 1000 +row;
+    return retTag;
+}
+- (NSIndexPath *)getIndexPathByTag:(NSInteger)tag{
+    NSInteger section = tag/1000;
+    NSInteger row = tag%1000;
+    
+    NSIndexPath * indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+    return indexPath;
+}
+
+- (BOOL)currentStatusByIndexPath:(NSIndexPath *)indexPath{
+    NSInteger secton = indexPath.section;
+    NSInteger row = indexPath.row;
+    
+    MESettingList *item = settingArray[secton];
+    Lm * info = item.lm[row];
+    
+    if ([info.type isEqualToString:@"close"]) {
+        return NO;
+        
+    }else if (info.mid.length > 0 || [info.type isEqualToString:@"open"]) {
+        return YES;
+        
+    }
+    return NO;
+
+}
+
+- (void)getSectionSwitchStatus:(NSInteger)section{
+    MESettingList *item = settingArray[section];
+    item.on = NO;
+
+    for (Lm * lm in item.lm) {
+        if ([lm.type isEqualToString:@"open"]) {
+            item.on = YES;
+            break;
+        }
+    }
+}
+//- (void)sectionSwitchValueChanged:(UISwitch *)sender{
+//
+//    MESettingList *item = settingArray[sender.tag];
+//    
+//    if (sender.on) {
+//        for (Lm * lm in item.lm) {
+//            lm.type = @"open";
+//        }
+//    }else{
+//        for (Lm * lm in item.lm) {
+//            lm.type = @"close";
+//        }
+//
+//    }
+//
+//    item.on = sender.on;
+//    [self.tableView reloadData];
+//
+//}
+- (void)switchValueChanged:(UISwitch *)sender{
+    
+    operation = 0;
+    NSIndexPath *indexPath = [self getIndexPathByTag:sender.tag];
+    NSInteger secton = indexPath.section;
+    NSInteger row = indexPath.row;
+    
+    MESettingList *item = settingArray[secton];
+    Lm * lm = item.lm[row];
+    if (sender.on) {
+        lm.type = @"open";
+    }else{
+        lm.type = @"close";
+    }
+    [self getSectionSwitchStatus:secton];
+    
+
+    if (sender.on) {
+        currentIndexPath = indexPath;
+        UIAlertView *inputAlertView = [[UIAlertView alloc] initWithTitle:@"请输入工时费" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"确定", nil];
+        inputAlertView.alertViewStyle = UIAlertViewStylePlainTextInput;
+        [inputAlertView show];
+        
+    }else{
+        lm.price = @"";
+        [self editServiceSetting:sender];
+    }
+
+}
+
+- (void)tableSectionViewTapped:(UIGestureRecognizer *)sender
+{
+    NSAssert([sender isKindOfClass:[UITapGestureRecognizer class]], @"Unexpected event sender!");
+    NSInteger section = sender.view.tag;
+    MESettingList *item = settingArray[section];
+    if (item.on) {
+        NSMutableArray *indexPaths = [[NSMutableArray alloc] initWithCapacity:0];
+        
+        for (int i =0;i<item.lm.count;i++) {
+            NSIndexPath * path = [NSIndexPath indexPathForItem:i inSection:section];
+            [indexPaths addObject:path];
+        }
+   
+        
+    [self.tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+    }
+    
+}
+
+#pragma mark FooterSelectedListViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 0) {
+        //得到输入框
+        UITextField *textField = [alertView textFieldAtIndex:0];
+        MESettingList *item = settingArray[currentIndexPath.section];
+        Lm *im = item.lm[currentIndexPath.row];
+        im.price = textField.text;
+        
+        CustomSectionInfo *item1 = [sectionDataSource objectAtIndex:currentIndexPath.section];
+        Lm *info = [item1.infoArray objectAtIndex:currentIndexPath.row];
+        info.price = textField.text;
+        //提交
+        ServiceSettingCell *cell = [self.tableView cellForRowAtIndexPath:currentIndexPath];
+        [self editServiceSetting:cell.switchCtrl];
+    }
+}
+- (BOOL)alertViewShouldEnableFirstOtherButton:(UIAlertView *)alertView{
+    UITextField *textField = [alertView textFieldAtIndex:0];
+    if (textField.text.length == 0 || textField.text.floatValue == 0) {
+        return NO;
+    }
+    return YES;
+}
+
+
+- (void)CustomSectionView:(CustomSectionView *)sectionView sectionClosed:(NSInteger)section
+{
+    CustomSectionInfo *info = [sectionDataSource objectAtIndex:section];
+    
+    info.open = !info.open;
+    
+    // 收缩+动画 (如果不需要动画直接reloaddata)
+//    NSInteger countOfRowsToDelete = [self.tableView numberOfRowsInSection:section];
+//    
+//    if (countOfRowsToDelete > 0) {
+//        [self.tableView deleteRowsAtIndexPaths:info.indexPaths withRowAnimation:UITableViewRowAnimationFade];
+//    }
+    [self.tableView
+     reloadSections:[NSIndexSet indexSetWithIndex:section]
+     withRowAnimation:UITableViewRowAnimationFade];
+}
+
+- (void)CustomSectionView:(CustomSectionView *)sectionView sectionOpened:(NSInteger)section
+{
+//    CustomSectionInfo *info1 = [sectionDataSource objectAtIndex:openedSection];
+//    info1.open = !info1.open;
+//    CustomSectionView *view = (CustomSectionView *)[self tableView:self.tableView viewForHeaderInSection:openedSection ];
+    [self.tableView beginUpdates];
+//
+//    [self CustomSectionView:view sectionClosed:openedSection];
+//    [self.tableView endUpdates];
+    
+//    openedSection = section;
+    CustomSectionInfo *info = [sectionDataSource objectAtIndex:section];
+    info.open = !info.open;
+
+    // 收缩+动画 (如果不需要动画直接reloaddata)
+//    [self.tableView beginUpdates];
+//
+    
+    if (openedSection != section){
+        
+        CustomSectionInfo *info1 = [sectionDataSource objectAtIndex:openedSection];
+        if (info1.open) {
+            info1.open = !info1.open;
+        }
+
+        [self.tableView
+         reloadSections:[NSIndexSet indexSetWithIndex:openedSection]
+         withRowAnimation:UITableViewRowAnimationFade];
+//        [self.tableView deleteRowsAtIndexPaths:info1.indexPaths withRowAnimation:UITableViewRowAnimationBottom];
+    }
+    openedSection = section;
+
+    [self.tableView
+     reloadSections:[NSIndexSet indexSetWithIndex:section]
+     withRowAnimation:UITableViewRowAnimationFade];
+//    [self.tableView insertRowsAtIndexPaths:info.indexPaths withRowAnimation:UITableViewRowAnimationTop];
+
+    
+    [self.tableView endUpdates];
+
+//        [self.tableView reloadData];
+}
+- (void)CustomSectionView1:(CustomSectionView *)sectionView sectionOpened:(NSInteger)section
+{
+    CustomSectionInfo *info = [sectionDataSource objectAtIndex:section];
+    info.open = !info.open;
+    [self.tableView insertRowsAtIndexPaths:info.indexPaths withRowAnimation:UITableViewRowAnimationFade];
+
+}
+@end

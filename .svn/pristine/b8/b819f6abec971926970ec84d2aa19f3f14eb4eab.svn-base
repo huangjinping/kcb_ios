@@ -1,0 +1,228 @@
+//
+//  MEOrderInfo.h
+//  Merchant
+//
+//  Created by Wendy on 16/1/5.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@class Order,Consumer,Evaluationlist,Evaluationpiclist,Suborderdetaillist,Suborder,Servicelist,Suborderdetail;
+@interface MEOrderInfo : NSObject
+
+@property (nonatomic, strong) NSArray *evaluationList;
+
+@property (nonatomic, strong) NSArray *suborder;
+
+@property (nonatomic, strong) Order *order;
+
+@property (nonatomic, strong) NSArray *suborderdetailList;
+
+@property (nonatomic, strong) NSArray *serviceList;
+
+@end
+
+@interface Order : NSObject
+
+@property (nonatomic, copy) NSString *account;
+
+@property (nonatomic, copy) NSString *carModelName;
+
+@property (nonatomic, copy) NSString *payTime;
+
+@property (nonatomic, copy) NSString *runTime;
+
+@property (nonatomic, copy) NSString *status;
+
+@property (nonatomic, assign) CGFloat payPrice;
+
+@property (nonatomic, copy) NSString *payType;
+
+@property (nonatomic, copy) NSString *travelMileage;
+
+@property (nonatomic, copy) NSString *phoneNo;
+
+@property (nonatomic, copy) NSString *orderType;
+
+@property (nonatomic, copy) NSString *name;
+
+@property (nonatomic, assign) CGFloat orderTotalPrice;
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *submitTime;
+
+@property (nonatomic, copy) NSString *orderNo;
+
+@property (nonatomic, assign) NSInteger merchantId;
+
+@property (nonatomic, copy) NSString *postalCode;
+
+@property (nonatomic, copy) NSString *cityCode;
+
+@property (nonatomic, copy) NSString *licenseCode;
+
+@property (nonatomic, copy) NSString *serviceType;
+
+@property (nonatomic, copy) NSString *carName;
+
+@property (nonatomic, strong) NSArray *consumer;
+
+@property (nonatomic, copy) NSString *bookingTime;
+
+@property (nonatomic, assign) CGFloat discountPrice;
+
+@property (nonatomic, copy) NSString *address;
+
+@property (nonatomic, copy) NSString *carModelId;
+
+@end
+
+@interface Consumer : NSObject
+
+@property (nonatomic, copy) NSString *status;
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *orderId;
+
+@property (nonatomic, copy) NSString *consumerCode;
+
+@property (nonatomic, copy) NSString *time;
+
+@end
+
+@interface Evaluationlist : NSObject
+
+@property (nonatomic, copy) NSString *status;
+
+@property (nonatomic, copy) NSString *headImage;
+
+@property (nonatomic, copy) NSString *orderId;
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, strong) NSArray *evaluationpicList;
+
+@property (nonatomic, copy) NSString *level;
+
+@property (nonatomic, copy) NSString *time;
+
+@property (nonatomic, copy) NSString *text;
+
+@property (nonatomic, copy) NSString *userName;
+
+@property (nonatomic, assign) NSInteger type;
+
+@end
+
+@interface Evaluationpiclist : NSObject
+
+@property (nonatomic, copy) NSString *status;
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *url;
+
+@property (nonatomic, assign) NSInteger evaluationId;
+
+@end
+
+@interface Suborderdetaillist : NSObject
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *volume;
+
+@property (nonatomic, assign) NSInteger serviceId;
+
+@property (nonatomic, copy) NSString *url;
+
+@property (nonatomic, copy) NSString *weight;
+
+@property (nonatomic, copy) NSString *orderNo;
+
+@property (nonatomic, assign) NSInteger componentId;
+
+@property (nonatomic, copy) NSString *componentNum;
+
+@property (nonatomic, assign) NSInteger subOrderId;
+
+@property (nonatomic, copy) NSString *componetBrand;
+
+@property (nonatomic, copy) NSString *componentName;
+
+@property (nonatomic, assign) CGFloat salePrice;
+
+@end
+
+@interface Suborder : NSObject
+
+@property (nonatomic, assign) NSInteger isDeal;
+
+@property (nonatomic, assign) NSInteger orderId;
+
+@property (nonatomic, assign) NSInteger channelId;
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *status;
+
+@property (nonatomic, copy) NSString *channelName;
+
+@property (nonatomic, copy) NSString *orderNo;
+
+@property (nonatomic, copy) NSString *sendTime;
+
+@property (nonatomic, copy) NSString *receiveTime;
+
+@property (nonatomic, copy) NSString *channelMobile;
+
+@end
+
+@interface Servicelist : NSObject
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, assign) NSInteger orderId;
+
+@property (nonatomic, assign) NSInteger serviceId;
+
+@property (nonatomic, strong) NSArray *suborderdetail;
+
+@property (nonatomic, copy) NSString *orderNo;
+
+@property (nonatomic, assign) CGFloat workHoursPrice;
+
+@property (nonatomic, copy) NSString *serviceName;
+@end
+
+@interface Suborderdetail : NSObject
+
+@property (nonatomic, assign) NSInteger ids;
+
+@property (nonatomic, copy) NSString *volume;
+
+@property (nonatomic, assign) NSInteger serviceId;
+
+@property (nonatomic, copy) NSString *url;
+
+@property (nonatomic, copy) NSString *weight;
+
+@property (nonatomic, copy) NSString *orderNo;
+
+@property (nonatomic, assign) NSInteger componentId;
+
+@property (nonatomic, copy) NSString *componentNum;
+
+@property (nonatomic, assign) NSInteger subOrderId;
+
+@property (nonatomic, copy) NSString *componetBrand;
+
+@property (nonatomic, copy) NSString *componentName;
+
+@property (nonatomic, assign) CGFloat dj;
+
+@end
+

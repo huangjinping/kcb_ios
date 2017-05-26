@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++660",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++660" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++660" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "C66A925A-78C4-4DE5-A638-778C81254677",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++660" : "Merchant\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Merchant",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Merchant.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/132.96.77.10\/svn\/TranPlat",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "cb2f2c1f-8e34-2f49-a904-cbc4c664622d++660"
+    }
+  ]
+}

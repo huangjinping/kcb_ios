@@ -1,0 +1,49 @@
+
+
+////  NetConfig.h
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 15/12/24.¥ø¥ø˚∆˙˚∆˙˚˙˚˙˚˙ƒ˙©ƒ˙©ƒ˙ç∫ç√ç∫√≈≈≈çåß∂åß
+//  Copyright © 2015年 ___ENT___. All rights reserved.
+//
+ 
+#ifndef NetConfig_h
+#define NetConfig_h
+
+//测试环境
+
+#define kWebserviceUrl @"132.96.77.130:8080"
+
+//#define kWebserviceUrl @"http://test.956122.com"
+//张鹏
+//#define kWebserviceUrl @"132.96.77.169:8080"
+//生产环境
+//#define kWebserviceUrl @"http://buss.956122.com"
+
+
+//常规保养保养
+#define kVINCarMessageURL @"m_car/findcxByVin"          //根据VIN获取车型信息
+#define kCarPlateURl @"m_car/findBrind"                //获取车辆品牌
+#define kCarlineURL @"m_car/findSeries"                //获取车系
+#define kCarGetGroupURL @"m_car/getGroups"             //获取排量、出厂日期、变速箱列表
+#define kCarModelLsitURL @"m_car/findCxByterm"         //获取车型
+#define kServiceListURL @"m_coreService/serviceList"   //根据服务类型获取服务项目
+#define kNearbyMerURL @"m_coreService/nearbyMer"       //获取附近商户
+#define kFittingMessURL @"m_coreService/carSerCom"     //获取配件信息
+#define kCarPortListURL @"m_coreService/reCom"         //更换配件列表
+#define kserFeeURL @"m_coreService/serFee"             //工时费
+//订单信息
+#define kOrderPostURL @"m_order/submitOrder"           //提交订单
+#define kOrderAllURL @"m_order/orderDataGrid"          //全部订单
+#define kOrderDetailURL @"m_order/orderMsg"            //订单详情
+#define kOrderWaitRecieveURL @"m_order/recComponet"    //待收货
+#define kOrderCancleURL @"m_order/orderCancel"         //取消订单
+#define kOrderFinishURL @"m_order/orderSuccess"        //订单完成
+#define kOrderWattingForComment @"m_order/addEvaluation"//订单评价
+#define korderBackURL @"m_order/orderBack"             //申请退款
+
+
+//获取天气信息
+#define kWeatherURL @"m_coreService/weather"
+#endif /* NetConfig_h */
+

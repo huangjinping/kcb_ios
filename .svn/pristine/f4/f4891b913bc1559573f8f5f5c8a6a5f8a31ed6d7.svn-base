@@ -1,0 +1,64 @@
+//
+//  OrderDetailCell.m
+//  Merchant
+//
+//  Created by Wendy on 16/1/12.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "OrderDetailCell.h"
+
+@implementation OrderDetailCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    
+    if (self) {
+        CGFloat leftMargin = 15;
+        CGFloat margin = 18;
+        CGFloat height = 88;
+        [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineColor];
+        
+        _iconView= [[UIImageView alloc] initWithFrame:CGRectMake(leftMargin, (height-59)/2, 59, 59)];
+        _iconView.image = [UIImage imageNamed:@"home_header1"];
+        [self.contentView addSubview:_iconView];
+        
+        _mainLabel = [[UILabel alloc] initWithFrame:CGRectMake(_iconView.right +margin, 10, 180, height/2 - 10)];
+        _mainLabel.text = @"小保养（机油，机滤）";
+        [self.contentView addSubview:_mainLabel];
+        
+        _subTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(_mainLabel.left, height/2-5, self.width, height/2 -10)];
+        _subTitleLabel.text = @"博世/Bosch AB2962(1片)";
+        [self.contentView addSubview:_subTitleLabel];
+        
+        _rightLable = [[UILabel alloc] initWithFrame:CGRectMake(APP_WIDTH-120, _mainLabel.top, 110, height/2 - 10)];
+        _rightLable.textAlignment = NSTextAlignmentRight;
+        [self.contentView addSubview:_rightLable];
+    }
+    return self;
+}
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+- (void)setRightLabelPrice:(CGFloat)price amount:(NSString *)amount{
+    
+    NSString *priceStr = [NSNumber numberWithFloat:price].stringValue;
+    
+    NSString *string = [NSString stringWithFormat:@"¥%@x%@", priceStr,amount];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: V3_36PX_FONT, NSForegroundColorAttributeName: kColor0X949694 } range:NSMakeRange(0, string.length)];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: V3_36PX_FONT, NSForegroundColorAttributeName: kColor0XFF9418 } range:NSMakeRange(0, priceStr.length + 1)];
+    self.rightLable.attributedText = attributedString;
+}
+@end

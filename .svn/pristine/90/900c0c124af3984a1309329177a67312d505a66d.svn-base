@@ -1,0 +1,15 @@
+//
+//  OrderDetailController.h
+//  Merchant
+//
+//  Created by Wendy on 16/1/12.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "BaseViewController.h"
+
+@interface OrderDetailController : BaseViewController
+@property(nonatomic,copy)NSString *orderId;
+@property(nonatomic,copy)NSString *orderNo;
+@property(nonatomic,copy)NSString *consumerCode;
+@end

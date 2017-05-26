@@ -1,0 +1,147 @@
+//
+//  HomeOrderCell.m
+//  Merchant
+//
+//  Created by Wendy on 15/12/30.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#import "HomeOrderCell.h"
+
+@implementation HomeOrderCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    
+    if (self) {
+        CGFloat leftM = 15;
+
+        _serverTypeLab = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, self.width/2, 25)];
+        _serverTypeLab.text = @"保养";
+        _serverTypeLab.textColor = RGB(38, 166, 36);
+        _serverTypeLab.font = [UIFont systemFontOfSize:16];
+        [self.contentView addSubview:_serverTypeLab];
+        
+        _orderTimeLab = [[UILabel alloc] initWithFrame:CGRectMake(_serverTypeLab.right+10, 0, APP_WIDTH -_serverTypeLab.right -20 , 25)];
+        _orderTimeLab.text = @"2015-12-24 19:33";
+        _orderTimeLab.textColor = [UIColor lightGrayColor];
+        _orderTimeLab.textAlignment = NSTextAlignmentRight;
+        _orderTimeLab.font = [UIFont systemFontOfSize:14];
+        [self.contentView addSubview:_orderTimeLab];
+        
+        [self.contentView addLineWithFrame:CGRectMake(leftM, 24, APP_WIDTH-2*leftM, 1) lineColor:kLineColor];
+        
+        CGFloat topM = 25;
+        _modelsLab = [[UILabel alloc] initWithFrame:CGRectMake(leftM, topM, self.right-leftM, 25)];
+        _modelsLab.text = @"保养车型:奥迪A8 L";
+        _modelsLab.font = [UIFont systemFontOfSize:16];
+        [self.contentView addSubview:_modelsLab];
+        
+        _statusLab = [[UILabel alloc] initWithFrame:CGRectMake(APP_WIDTH-100, topM, 100 , 25)];
+        _statusLab.text = @"待保养";
+        _statusLab.textColor = RGB(38, 166, 36);
+        _statusLab.textAlignment = NSTextAlignmentCenter;
+        _statusLab.font = [UIFont systemFontOfSize:15];
+        [self.contentView addSubview:_statusLab];
+
+        
+        _mobileLab = [[UILabel alloc] initWithFrame:CGRectMake(leftM, _modelsLab.bottom, self.right-leftM, 25)];
+        _mobileLab.font = [UIFont systemFontOfSize:16];
+
+        _mobileLab.text = @"手机号码:15210239487";
+        [self.contentView addSubview:_mobileLab];
+        
+        _amountLab = [[UILabel alloc] initWithFrame:CGRectMake(leftM, _mobileLab.bottom, self.right-leftM, 25)];
+        _amountLab.font = [UIFont systemFontOfSize:16];
+
+        _amountLab.text = @"订单金额:168元";
+        [self.contentView addSubview:_amountLab];
+
+        _appointmentLab = [[UILabel alloc] initWithFrame:CGRectMake(leftM, _amountLab.bottom, self.right-leftM, 25)];
+        _appointmentLab.font = [UIFont systemFontOfSize:16];
+
+        _appointmentLab.text = @"预约时间:2015-12-29 上午";
+        [self.contentView addSubview:_appointmentLab];
+        
+        _actionBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        _actionBtn.frame = CGRectMake(0, 0, 120, 35);
+        _actionBtn.centerX = _statusLab.centerX;
+        _actionBtn.centerY = _mobileLab.bottom;
+        _actionBtn.hidden = YES;
+        [self.contentView addSubview:_actionBtn];
+        
+        
+    }
+    return self;
+}
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+- (void)setCellStatusLab:(NSString *)value{
+    if (value.intValue == 1) {
+        self.statusLab.text = @"待接单";
+        self.statusLab.textColor = RGB(38, 166, 36);
+        [_actionBtn setTitle:@"确认接单"];
+        _actionBtn.hidden = NO;
+        
+    }else if(value.intValue == 2){
+        self.statusLab.text = @"待服务";
+        self.statusLab.textColor = RGB(38, 166, 36);
+        _actionBtn.hidden = YES;
+    }else if(value.intValue == 3){
+        self.statusLab.text = @"已完成";
+        self.statusLab.textColor = RGB(38, 166, 36);
+        _actionBtn.hidden = YES;
+    }else if(value.intValue == 4){
+        self.statusLab.text = @"退款中";
+        self.statusLab.textColor = RGB(38, 166, 36);
+        _actionBtn.hidden = YES;
+    }else if(value.intValue == 5){
+        self.statusLab.text = @"已退款";
+        self.statusLab.textColor = RGB(38, 166, 36);
+        _actionBtn.hidden = YES;
+    }
+}
+- (void)setCellMobileLab:(NSString *)value{
+    NSString *string = [NSString stringWithFormat:@"手机号码：%@", value];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: [UIColor colorWithHex:0x949693] } range:NSMakeRange(0, 5)];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: kColor0X666666 } range:NSMakeRange(5, string.length - 5)];
+    self.mobileLab.attributedText = attributedString;
+}
+- (void)setCellModelsLab:(NSString *)value{
+    NSString *string = [NSString stringWithFormat:@"保养车型：%@", value];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: [UIColor colorWithHex:0x949693] } range:NSMakeRange(0, 5)];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: kColor0X666666 } range:NSMakeRange(5, string.length - 5)];
+    self.modelsLab.attributedText = attributedString;
+}
+
+- (void)setCellAmountLab:(NSString *)value{
+    NSString *string = [NSString stringWithFormat:@"订单金额：%@元", value];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: [UIColor colorWithHex:0x949693] } range:NSMakeRange(0, 5)];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: kColor0X666666 } range:NSMakeRange(5, string.length - 5)];
+    self.amountLab.attributedText = attributedString;
+}
+
+- (void)setCellAppointmentLab:(NSString *)value{
+    NSString *string = [NSString stringWithFormat:@"预约时间：%@", value];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: [UIColor colorWithHex:0x949693] } range:NSMakeRange(0, 5)];
+    
+    [attributedString addAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:17], NSForegroundColorAttributeName: [UIColor orangeColor] } range:NSMakeRange(5, string.length - 5)];
+    self.appointmentLab.attributedText = attributedString;
+}
+
+@end

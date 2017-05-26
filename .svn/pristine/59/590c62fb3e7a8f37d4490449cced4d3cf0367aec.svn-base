@@ -1,0 +1,88 @@
+//
+//  CarPartListController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/8.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CarPartListController.h"
+#import "FittingsCell.h"
+#import "ChangWaresCell.h"
+#import "CarPartListView.h"
+
+@interface CarPartListController ()
+
+@end
+
+static NSString *cellId = @"cellId";
+
+@implementation CarPartListController
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"零件列表"];
+}
+
+- (void)viewDidLoad{
+    [super viewDidLoad];
+    CarPartListView *cv = [CarPartListView sharePartListView];
+    __weak __typeof(cv) weakCV = cv;
+    cv.commplete = ^{
+        [weakCV showInView:self.view];
+    };
+    cv.origin = CGPointMake(0, APP_VIEW_Y);
+    [self.view addSubview:cv];
+    self.tableView.backgroundColor = kClearColor;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.y = cv.bottom;
+    self.tableView.tableFooterView = [UIView new];
+    self.tableView.height -= cv.height;
+}
+
+- (void)requestData:(MJRefreshType)refreshType{
+    [[NetworkEngine sharedNetwork] postBody:@{@"page":@(self.page),@"rows":@"10",@"carid":@"1",@"volume":_volume,@"merid":_merid,@"groupid":_groupid} apiPath:kCarPortListURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        [self.tableView.header endRefreshing];
+        [self.tableView.footer endRefreshing];
+        
+        if (state == StateSucceed) {
+            if (refreshType != MJRefreshTypeFooter) {
+                [self.dataSource removeAllObjects];
+            }
+            [self.dataSource addObjectsFromArray:resObj[@"body"][@"comList"]];
+            self.tableView.footer.hidden = [[resObj[@"body"][@"comList"] analysisConvertToArray] count] <= 10;
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        [self.tableView.header endRefreshing];
+        [self.tableView.footer endRefreshing];
+    }];;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 245*y_6_plus;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ChangWaresCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+    if (!cell) {
+        cell = [[ChangWaresCell alloc]init];
+    }
+    [cell configCellWithDic:self.dataSource[indexPath.row]];
+
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (_commplete) {
+        _commplete(self.dataSource[indexPath.row]);
+    }
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+@end

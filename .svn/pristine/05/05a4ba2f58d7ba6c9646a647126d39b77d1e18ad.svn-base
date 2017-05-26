@@ -1,0 +1,71 @@
+//
+//  ChangePasswordController.m
+//  Merchant
+//
+//  Created by Wendy on 16/1/11.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "ChangePasswordController.h"
+
+@interface ChangePasswordController ()<UITextFieldDelegate>
+@property (nonatomic, strong) UITextField *oldPwdTF;
+@property (nonatomic, strong) UITextField *nnewPwdTF;
+@property (nonatomic, strong) UITextField *confirmPwdTF;
+@end
+
+@implementation ChangePasswordController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.navigationItem.title = @"修改密码";
+    // Do any additional setup after loading the view.
+    [self buildUI];
+}
+
+- (void)buildUI{
+    UIButton *logonBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    logonBtn.frame = CGRectMake(10, 200, APP_WIDTH-20, 40);
+    logonBtn.titleLabel.font = [UIFont systemFontOfSize:19];
+    logonBtn.tintColor = [UIColor purpleColor];
+    [logonBtn setTitle:@"确认修改" forState:UIControlStateNormal];
+    [logonBtn setTitleColor:[UIColor redColor]];
+    [logonBtn addTarget:self action:@selector(changePwdAction:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:logonBtn];
+
+}
+- (void)changePwdAction:(UIButton *)sender{
+    if (_from == 0) {
+        [ApplicationDelegate loadHomeView];
+    }else{
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    if (textField == _oldPwdTF) {
+        [_nnewPwdTF becomeFirstResponder];
+    } else if (textField == _nnewPwdTF) {
+        [_confirmPwdTF becomeFirstResponder];
+    }else if (textField == _confirmPwdTF){
+        [_confirmPwdTF resignFirstResponder];
+    }
+    
+    return YES;
+}
+
+@end

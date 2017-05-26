@@ -1,0 +1,44 @@
+//
+//  MinePersonCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/14.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "MinePersonCell.h"
+
+@implementation MinePersonCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _icon = [[UIImageView alloc]init];
+        _icon.layer.masksToBounds = YES;
+        _nameLabel = [[UILabel alloc]init];
+        _phoneLabel = [[UILabel alloc]init];
+        _addressLabel = [[UILabel alloc]init];
+        
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_nameLabel];
+        [self.contentView addSubview:_phoneLabel];
+        [self.contentView addSubview:_addressLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _icon.frame = CGRectMake(5, 0, 74*y_6_SCALE, 74*y_6_SCALE);
+    _icon.centerY = self.contentView.boundsCenter.y;
+    _icon.layer.cornerRadius = _icon.width/2;
+    
+    _nameLabel.frame = CGRectMake(_icon.right+5, _icon.y, 100, 22);
+    _phoneLabel.frame = CGRectMake(_nameLabel.x+5, _nameLabel.bottom, 200, 22);
+    _addressLabel.frame = CGRectMake(_phoneLabel.x, _phoneLabel.bottom, 100, 22);
+    
+}
+
+@end

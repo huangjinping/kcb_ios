@@ -1,0 +1,32 @@
+/* 
+  Localizable.strings
+  ENT_tranPlat_iOS
+
+  Created by yanyan on 14-10-22.
+  Copyright (c) 2014年 ___ENT___. All rights reserved.
+*/
+
+
+"Done" = "完成";
+"Select Photos" = "";
+"photo" = "";
+"photos" = "";
+"of" = "/";
+"Cancel" = "取消";
+"Save" = "保存";
+"Copy" = "拷贝";
+"Email" = "邮件";
+"Saving" = "保存中";
+"Failed" = "失败";
+"Saved" = "已保存";
+"Copying" = "拷贝中";
+"Copied" = "已拷贝";
+"Preparing" = "准备中";
+"Email failed to send. Please try again." = "邮件发送失败，请重试。";
+"Dismiss" = "失败";
+"" = "";
+"" = "";
+"" = "";
+"" = "";
+"" = "";
+

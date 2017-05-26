@@ -1,0 +1,82 @@
+//
+//  HomeViewController.m
+//  Merchant
+//
+//  Created by Wendy on 15/12/18.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#import "HomeViewController.h"
+#import "AccessoriesPurchaseController.h"
+#import "LoginViewController.h"
+
+@interface HomeViewController ()
+
+@end
+
+@implementation HomeViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    UIButton *forgetPasswordBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+    forgetPasswordBtn.frame=  CGRectMake(20, 100, 100, 30);
+    [forgetPasswordBtn setTitle:@"忘记密码？" forState:UIControlStateNormal];
+    forgetPasswordBtn.titleLabel.font = [UIFont systemFontOfSize:17];
+    [forgetPasswordBtn addTarget:self action:@selector(goForgetPassword) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:forgetPasswordBtn];
+    [self resetNavigationBar];
+}
+
+- (void)resetNavigationBar{
+    [self setNavTitle:@"闹闹小店"];
+    
+    self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:
+                                              [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"edit_status"] style:UIBarButtonItemStylePlain target:self action:@selector(message)],
+                                              [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"edit_status"] style:UIBarButtonItemStylePlain target:self action:@selector(customMessage)],
+                                              nil];
+}
+- (void)message{
+    if (ApplicationDelegate.showingRootController == YES) {
+        [ApplicationDelegate.menuController showRightController:YES];
+    } else{
+        [ApplicationDelegate.menuController showRootController:YES];
+    }
+    ApplicationDelegate.showingRootController = !ApplicationDelegate.showingRootController;
+}
+- (void)customMessage{
+}
+- (void)goForgetPassword{
+//    AccessoriesPurchaseController *dddd = [[AccessoriesPurchaseController alloc] init];
+//    [self.navigationController pushViewController:dddd animated:YES];
+    
+    LoginViewController *l = [[LoginViewController alloc]init];
+    [self.navigationController pushViewController:l animated:YES];
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+// 侧滑出个人中心页面
+- (void)backEvent:(UIBarButtonItem *)paramItem
+{
+    if (ApplicationDelegate.showingRootController == YES) {
+        [ApplicationDelegate.menuController showLeftController:YES];
+    } else{
+        [ApplicationDelegate.menuController showRootController:YES];
+    }
+    ApplicationDelegate.showingRootController = !ApplicationDelegate.showingRootController;
+}
+
+@end

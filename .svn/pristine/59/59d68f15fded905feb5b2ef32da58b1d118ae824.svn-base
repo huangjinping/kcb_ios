@@ -1,0 +1,439 @@
+//  ConfirmOrderController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/5.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "ConfirmOrderController.h"
+#import "OrderPayViewController.h"
+#import "OrderPersonInfoCell.h"
+#import "OrderOutletCell.h"
+#import "OrderTypeCell.h"
+#import "OrderSelectCell.h"
+
+#import "OrderModel.h"
+#import "HBookingInfoModel.h"
+#import "HServiceModel.h"
+#import "HProductModel.h"
+
+@interface ConfirmOrderController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong)UITableView *tableView;
+@property (nonatomic, strong)UIView *footerView;
+@property (nonatomic, strong)NSMutableArray *serFeeArr;
+
+@end
+
+static NSString *personCellId = @"personCellId";
+static NSString *outletCellId = @"outletCellId";
+static NSString *fittingCellId = @"fittingCellId";
+static NSString *typeCellId = @"typeCellId";
+static NSString *selectCellId = @"selectCellId";
+
+@implementation ConfirmOrderController
+{
+    OrderModel *_model;                         //订单信息
+    
+    UILabel *_priceLabel;                       //支付价格
+    UITextField *_nameF;                        //姓名
+    UITextField *_phoneNumberF;                 //手机号
+    NSString *_consumerCode;                    //消费吗
+    NSString *_orderNo;                         //订单号
+    
+    UILabel *_serviceLabel;                     //几件商品，几件服务
+    UILabel *_totalLabel;                       //总价
+    
+    NSMutableArray *_dataSource;
+    
+    UIButton *_zhifuBtn;
+    BOOL _res;
+}
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _serFeeArr = [NSMutableArray array];
+        _model = [[OrderModel alloc]init];
+        _dataSource = [NSMutableArray array];
+    }
+    
+    return self;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"确认订单"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self configUI];
+    [self changeOriginData];                                        //转化数据源为原始数据（可建模型）
+    [self requestData];
+}
+
+- (void)requestData{
+    [[NetworkEngine sharedNetwork] postBody:@{@"merid":_merchantId,@"serids":self.serids} apiPath:kserFeeURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        if (state == StateSucceed) {
+            [_serFeeArr addObjectsFromArray:resObj[@"body"][@"serFeeList"]];
+            [self calculatePrice];
+            [self.tableView reloadData];
+        }
+    } failed:^(NSError *error) {
+        
+    }];
+}
+
+- (void)configUI{
+    [self.view addSubview:self.tableView];
+    [self.view addSubview:self.footerView];
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, APP_VIEW_Y, APP_WIDTH, self.view.height-
+                                                              APP_VIEW_Y-49)
+                                             style:UITableViewStyleGrouped];
+    [_tableView registerClass:[OrderPersonInfoCell class] forCellReuseIdentifier:personCellId];
+    [_tableView registerClass:[OrderOutletCell class] forCellReuseIdentifier:outletCellId];
+    [_tableView registerClass:[FittingsCell class] forCellReuseIdentifier:fittingCellId];
+    [_tableView registerClass:[OrderTypeCell class] forCellReuseIdentifier:typeCellId];
+    [_tableView registerClass:[OrderSelectCell class] forCellReuseIdentifier:selectCellId];
+    
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.showsVerticalScrollIndicator = NO;
+    
+    return _tableView;
+}
+
+- (UIView *)footerView{
+    if (_footerView) {
+        return _footerView;
+    }
+    _footerView = [[UIView alloc]initWithFrame:CGRectMake(0, self.view.height-49, APP_WIDTH, 49)];
+    _footerView.backgroundColor = kWhiteColor;
+    
+    __block __typeof(self) weakSelf = self;
+    _zhifuBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_zhifuBtn addActionBlock:^(id weakSender) {
+        [weakSelf orderPost];
+        _zhifuBtn.enabled = NO;
+        
+    } forControlEvents:UIControlEventTouchUpInside];
+    [_zhifuBtn setTitle:@"立即支付"];
+    [_zhifuBtn setTitleColor:kWhiteColor];
+    _zhifuBtn.backgroundColor = kTextOrangeColor;
+    _zhifuBtn.frame = CGRectMake(_footerView.width-80*x_6_SCALE, 0, 80*x_6_SCALE, _footerView.height);
+    
+    _priceLabel = [[UILabel alloc]initWithFrame:CGRectMake(_footerView.width-_zhifuBtn.width-10*x_6_SCALE-200*x_6_SCALE, 0, 200*x_6_SCALE, _footerView.height)];
+    _priceLabel.textColor = kTextGrayColor;
+    _priceLabel.textAlignment = NSTextAlignmentRight;
+    
+    NSString *total = [NSString stringWithFormat:@"实付：￥--"];
+    
+    NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+    [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666],NSFontAttributeName:V3_34PX_FONT} range:NSMakeRange(0, 3)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_46PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(3, total.length-3)];
+    _priceLabel.attributedText = mAtt;
+    [_footerView addSubview:_priceLabel];
+    [_footerView addSubview:_zhifuBtn];
+    
+    return _footerView;
+}
+
+- (void)calculatePrice{
+    for (NSDictionary *dic in _serFeeArr) {
+        _totalPrice += [dic[@"price"] floatValue];
+    }
+    
+    NSString *total = [NSString stringWithFormat:@"实付：¥%.2f",_totalPrice];
+    
+    NSMutableAttributedString *mAtt = [[NSMutableAttributedString alloc]initWithString:total];
+    [mAtt addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHex:0x666666],NSFontAttributeName:V3_34PX_FONT} range:NSMakeRange(0, 3)];
+    [mAtt addAttributes:@{NSFontAttributeName:V3_46PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(3, total.length-3)];
+    _priceLabel.attributedText = mAtt;
+}
+
+- (void)changeOriginData{
+    NSArray *obj = [self.dataArr sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        return [obj1[@"serid"] compare:obj2[@"serid"]];
+    }];
+    if (obj.count == 1) {
+        NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+        [dic setObject:@[obj] forKey:@"comList"];
+        [dic setObject:obj[0][@"serName"] forKey:@"serName"];
+        [dic setObject:obj[0][@"serid"] forKey:@"serid"];
+        [_dataSource addObject:dic];
+    }else{
+        NSMutableArray *mArr = [NSMutableArray arrayWithObject:obj[0]];
+        for (int i = 0; i< obj.count-1; i++) {
+            if ([obj[i][@"serid"] isEqual:obj[i+1][@"serid"]]) {
+                [mArr addObject:obj[i+1]];
+                if (i+1 == obj.count-1) {
+                    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+                    [dic setObject:mArr forKey:@"comList"];
+                    [dic setObject:obj[i][@"serName"] forKey:@"serName"];
+                    [dic setObject:obj[i][@"serid"] forKey:@"serid"];
+                    [_dataSource addObject:dic];
+                }
+                continue;
+            }else{
+                if (i+1 != obj.count-1) {
+                    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+                    [dic setObject:mArr forKey:@"comList"];
+                    [dic setObject:obj[i][@"serName"] forKey:@"serName"];
+                    [dic setObject:obj[i][@"serid"] forKey:@"serid"];
+                    [_dataSource addObject:dic];
+                    
+                    mArr = [NSMutableArray arrayWithObject:obj[i+1]];
+                    continue;
+                }else{
+                    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+                    [dic setObject:@[obj[i+1]] forKey:@"comList"];
+                    [dic setObject:obj[i+1][@"serName"] forKey:@"serName"];
+                    [dic setObject:obj[i+1][@"serid"] forKey:@"serid"];
+                    
+                    [_dataSource addObject:dic];
+                    break;
+                }
+            }
+        }
+    }
+}
+
+- (void)initPostData{
+    
+    HBookingInfoModel *bM = [[HBookingInfoModel alloc]init];
+    
+    bM.account = APP_DELEGATE.userName;
+    bM.name = _nameF.text;
+    bM.phoneNo = _phoneNumberF.text;
+    bM.bookingTime = _bookingTime;
+    UserInfo *user = [[[DataBase sharedDataBase]selectUserByName:APP_DELEGATE.userName] lastObject];
+    bM.address = user.addr;
+    bM.postalCode = user.postCode;
+
+    NSMutableArray *proArr = [NSMutableArray array];
+    for (NSDictionary *dic in _dataSource) {
+        HServiceModel *sM = [[HServiceModel alloc]init];
+        sM.serviceId = dic[@"serid"];
+        sM.serviceName = dic[@"serName"];
+        for (NSDictionary *d in _serFeeArr) {
+            if ([d[@"id"] isEqual:dic[@"serid"]]) {
+                sM.workHoursPrice = d[@"price"];
+                break;
+            }
+        }
+        NSMutableArray *mArr = [NSMutableArray array];
+        for (NSDictionary *d in dic[@"comList"]) {
+            HProductModel *pM = [[HProductModel alloc]init];
+            pM.componentId = d[@"id"];
+            pM.componentName = d[@"name"];
+            pM.componentUrl = d[@"url"];
+            pM.componentNum = d[@"account"];
+            pM.weight = nil;
+            pM.volume = d[@"volume"];
+            pM.componetBrand = d[@"brandName"];
+            pM.dj = d[@"merPrice"];
+            pM.salePrice = d[@"price"];
+            
+            [mArr addObject:pM];
+        }
+        sM.productList = mArr;
+        
+        [proArr addObject:sM];
+    }
+    
+/********************************************************/
+    _model.merchantMoible = _merchantMoible;
+    _model.channelMobile = _chantInfo[@"channelPhone"];
+    _model.channelName = _chantInfo[@"channelName"];
+    _model.merchantId = _merchantId;
+    _model.merchantName = _merchantName;
+    _model.merchantAddress = _merchantAddress;
+    _model.merchantPhone = _merchantPhone;
+    _model.merchantImage = _merchantImage;
+    _model.chanelId = _chanelId;                                                //配件商ID
+    _model.payPrice = [NSString stringWithFormat:@"%.2f",_totalPrice];
+    _model.totalPrice = [NSString stringWithFormat:@"%.2f",_totalPrice];
+#warning DOIT
+    _model.orderType = @"1";                                                    //订单类型(保养、洗车。。)
+    _model.serviceType = @"1";                                                  //服务类型
+    _model.payType = @"1";
+    NSUserDefaults *u = [NSUserDefaults standardUserDefaults];
+    NSString *code = [u objectForKey:KEY_CITY_ADCODE_IN_USERDEFAULT];
+    _model.cityCode = code;
+    _model.payTime = [[NSDate date] stringWithDateFormat:DateFormatWithDateAndTime];
+    _model.vehicleInfo = _carModel;
+    _model.bookingInfo = bM;
+    _model.serviceList = proArr;
+}
+
+- (BOOL)vertify{
+    if (![_nameF.text isLegal]) {
+        [UITools alertWithMsg:@"请输入联系人姓名"];
+        return NO;
+    }
+    if (![_phoneNumberF.text isLegal]) {
+        [UITools alertWithMsg:@"请输入手机号"];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)orderPost{
+    if (![self vertify]) {
+        return ;
+    }
+    [self initPostData];
+    
+    [UITools showIndicatorToView:self.view];
+    [[NetworkEngine sharedNetwork] postBody:@{@"body":[_model mj_keyValues]} apiPath:kOrderPostURL hasHeader:YES finish:^(ResultState state, id resObj) {
+        [UITools hideHUDForView:self.view];
+        _zhifuBtn.enabled = YES;
+        if (state == StateSucceed) {
+            _consumerCode = [resObj[@"body"][0][@"consumerCode"] analysisConvertToString];
+            _orderNo = [resObj[@"body"][0][@"orderNo"] analysisConvertToString];
+            [UITools alertWithMsg:@"订单提交成功" viewController:self action:^{
+                OrderPayViewController *ovc = [[OrderPayViewController alloc]init];
+                ovc.consumerCode = _consumerCode;
+                ovc.orderNo = _orderNo;
+                ovc.orderId = [resObj[@"body"][0][@"id"] analysisConvertToString];
+                ovc.bookingTime = _bookingTime;
+                ovc.merchant = _merchantName;
+                ovc.merchantAddress = _merchantAddress;
+                ovc.merchantPhone = _merchantPhone;
+                
+                [self.navigationController pushViewController:ovc animated:YES];
+            }];
+        }
+    } failed:^(NSError *error) {
+        [UITools hideHUDForView:self.view];
+        _zhifuBtn.enabled = YES;
+    }];
+}
+
+#pragma mark - UITableViewDataSource && UITableViewDelegate
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 4;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return section != 0 ? CGFLOAT_MIN : 35*y_6_plus;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    if (section == 3) {
+        return 114*y_6_plus;
+    }
+    return 30*y_6_plus;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        return 138*2*y_6_plus;
+    }else if (indexPath.section == 1){
+        return 136*y_6_SCALE;
+    }else if (indexPath.section == 2){
+        return 250*y_6_plus;
+    }
+    
+    return 136*y_6_plus;
+}
+ 
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section == 0 || section == 1) {
+        return 1;
+    }else if (section == 2){
+        return _dataArr.count;
+    }
+    
+    return _serFeeArr.count;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    if (section == 3) {
+        UIView *view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, tableView.width, 114*y_6_plus)];
+        view.backgroundColor = kWhiteColor;
+        _serviceLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 680*x_6_plus, view.height)];
+        _serviceLabel.textAlignment = NSTextAlignmentRight;
+        _serviceLabel.text = [NSString stringWithFormat:@"共%lu件商品（%lu项服务）",(unsigned long)self.dataArr.count,(unsigned long)_dataSource.count];
+        _serviceLabel.font = V3_38PX_FONT;
+        _serviceLabel.textColor = [UIColor blackColor];
+        
+        _totalLabel = [[UILabel alloc]initWithFrame:CGRectMake(_serviceLabel.right, 0, view.width-_serviceLabel.width, view.height)];
+//        CGFloat p = 0;
+//        for (NSDictionary *dic in _serFeeArr) {
+//            p += [dic[@"price"] floatValue];
+//        }
+        _totalLabel.text = [NSString stringWithFormat:@"合计:￥%.2f",_totalPrice];
+        NSMutableAttributedString *str = [[NSMutableAttributedString alloc]initWithString:_totalLabel.text];
+        [str addAttributes:@{NSFontAttributeName:V3_46PX_FONT,NSForegroundColorAttributeName:kTextOrangeColor} range:NSMakeRange(3, _totalLabel.text.length-3)];
+        [str addAttributes:@{NSFontAttributeName:V3_38PX_FONT,NSForegroundColorAttributeName:[UIColor blackColor]} range:NSMakeRange(0, 3)];
+        _totalLabel.attributedText = str;
+
+
+        [view addSubview:_serviceLabel];
+        [view addSubview:_totalLabel];
+        
+        return view;
+    }
+    return nil;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0) {
+        OrderPersonInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:personCellId];
+        if (!cell) {
+            cell = [[OrderPersonInfoCell alloc]init];
+        }
+        _nameF = cell.nameF;
+        _phoneNumberF = cell.phoneF;
+        
+        return cell;
+    
+    }else if (indexPath.section == 1){
+        OrderOutletCell *cell = [tableView dequeueReusableCellWithIdentifier:outletCellId];
+        if (!cell) {
+            cell = [[OrderOutletCell alloc]init];
+        }
+        cell.score = self.score;
+        cell.name = self.merchantName;
+        cell.phone = self.merchantPhone;
+        cell.address = self.merchantAddress;
+        cell.distance = self.merchantDistance;
+        
+        return cell;
+    
+    }else if (indexPath.section == 2){
+        FittingsCell *cell = [tableView dequeueReusableCellWithIdentifier:fittingCellId];
+        if (!cell) {
+            cell = [[FittingsCell alloc]init];
+            
+        }
+        cell.rV.hidden = YES;
+        cell.price = _dataArr[indexPath.row][@"price"];
+        cell.num = _dataArr[indexPath.row][@"account"];
+        [cell configCellWithDic:self.dataArr[indexPath.row]];
+        
+        return cell;
+    }
+    OrderTypeCell *cell = [tableView dequeueReusableCellWithIdentifier:typeCellId];
+    if (!cell) {
+        cell = [[OrderTypeCell alloc]init];
+    }
+    if (_serFeeArr.count) {
+        cell.name = [NSString stringWithFormat:@"%@服务:",_serFeeArr[indexPath.row][@"name"]];
+        cell.price = [NSString stringWithFormat:@"%@",_serFeeArr[indexPath.row][@"price"]];
+    }
+    
+
+    return cell;
+}
+
+@end

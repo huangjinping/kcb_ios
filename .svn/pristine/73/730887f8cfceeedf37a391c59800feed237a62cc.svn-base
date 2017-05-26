@@ -1,0 +1,78 @@
+//
+//  RenzhengViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by Lin_LL on 16/1/6.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "RenzhengViewController.h"
+
+@interface RenzhengViewController (){
+    UIScrollView            *_rootScrollView;
+    UIImageView     *_perfectCarinfoFormBgView;
+    
+}
+
+@end
+
+@implementation RenzhengViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self creatUI];
+   
+}
+
+-(void)creatUI{
+    
+    _rootScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 64, APP_WIDTH, APP_HEIGHT - APP_NAV_HEIGHT )];
+    [_rootScrollView setBackgroundColor:COLOR_VIEW_CONTROLLER_BG];
+    _rootScrollView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:_rootScrollView];
+
+   ZKButton *carButton=[ZKButton blockButtonWithFrame:BBRectMake(0, 20, 1080, 700) type:UIButtonTypeSystem title:@"" backgroundImage:@"" andBlock:^(ZKButton *button) {
+       CarBindViewController *carBindVC = [[CarBindViewController alloc] init];
+       [self.navigationController pushViewController:carBindVC animated:YES];
+       
+   }];
+    carButton.backgroundColor=[UIColor clearColor];
+    carButton.adjustsImageWhenHighlighted = NO;
+    [carButton setBackgroundImage:[UIImage imageNamed:@"mac01"] forState:UIControlStateNormal];
+    [_rootScrollView addSubview:carButton];
+ 
+    //*********************************违章处理*********************************
+
+   ZKButton *diverButton=[ZKButton blockButtonWithFrame:BBRectMake(0,20+20+700, 1080, 700) type:UIButtonTypeSystem title:@"" backgroundImage:@"" andBlock:^(ZKButton *button) {
+       DriverBindViewController *dbvc = [[DriverBindViewController alloc] init];
+       [self.navigationController pushViewController:dbvc animated:YES];
+  
+    }];
+     diverButton.adjustsImageWhenHighlighted = NO;
+     diverButton.backgroundColor=[UIColor clearColor];
+     [diverButton setBackgroundImage:[UIImage imageNamed:@"mac02"] forState:UIControlStateNormal];
+    [_rootScrollView addSubview:diverButton];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self setCustomNavigationTitle:@"认证管理"];
+   
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

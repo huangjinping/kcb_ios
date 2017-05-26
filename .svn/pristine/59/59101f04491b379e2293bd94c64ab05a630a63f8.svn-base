@@ -1,0 +1,147 @@
+//
+//  LeftViewController.m
+//  Merchant
+//
+//  Created by Wendy on 15/12/18.
+//  Copyright © 2015年 tranPlat. All rights reserved.
+//
+
+#import "LeftViewController.h"
+#import "MyStoreViewController.h"
+#import "MyStoreController.h"
+#import "MapViewController.h"
+#import "AboutViewController.h"
+#import <UIImageView+WebCache.h>
+
+@interface LeftViewController ()<UITableViewDelegate,UITableViewDataSource>{
+    UILabel *storeName;
+    UIImageView *storeIcon;
+}
+@property (nonatomic,strong)UITableView *tableView;
+
+@end
+
+@implementation LeftViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.backgroundColor = kColorBackgroud;
+    //    self.tableView.backgroundColor = [UIColor lightGrayColor];
+    [self buildUI];
+}
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    NSString * url = [NSString stringWithFormat:@"%@%@",kHttpIPAddress,ApplicationDelegate.shareLoginData.userdata.logo];
+    NSLog(@"头像当前的图片地址:%@",url);
+    [storeIcon sd_setImageWithURL:[NSURL URLWithString:url] placeholderImage:[UIImage imageNamed:@"home_header1"] options:SDWebImageRefreshCached];
+    
+    storeName.text = ApplicationDelegate.shareLoginData.userdata.mername;
+    
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)buildUI{
+    UIView * view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APP_WIDTH, 100)];
+    view.backgroundColor = [UIColor whiteColor];
+    storeIcon = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 80, 80)];
+
+    storeIcon.contentMode = UIViewContentModeScaleToFill;
+    [view addSubview:storeIcon];
+    
+    storeName= [[UILabel alloc] initWithFrame:CGRectMake(storeIcon.right+10, 0, APP_WIDTH-storeIcon.right, 40)];
+    
+    storeName.centerY = storeIcon.centerY;
+    storeName.font = V3_42PX_FONT;
+
+    [view addSubview:storeName];
+    [view addLineWithFrame:CGRectMake(0, view.bottom - 1,APP_WIDTH , 1) lineColor:kLineColor];
+    [self.view addSubview:view];
+    
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, view.bottom, self.view.width, self.view.height - view.height) style:UITableViewStylePlain];
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    self.tableView.backgroundColor = kColorBackgroud;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:self.tableView];
+
+
+}
+/*
+ #pragma mark - Navigation
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 50;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 1.0f;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.width, 1)];
+    view.backgroundColor = [UIColor colorWithHex:0xe9e9e9 alpha:0.8];
+    return view;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 3;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
+                                      reuseIdentifier:identifier];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.textLabel.font = V3_42PX_FONT;
+    }
+    
+    if(indexPath.section == 0){
+        cell.imageView.image = [UIImage imageNamed:@"wodemendian"];
+        cell.textLabel.text = @"我的门店";
+        
+    }if(indexPath.section == 1){
+        cell.imageView.image = [UIImage imageNamed:@"shezhi"];
+        cell.textLabel.text = @"设置";
+        
+    }if(indexPath.section == 2){
+        cell.imageView.image = [UIImage imageNamed:@"exit"];
+        cell.textLabel.text = @"退出";
+        
+    }
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if(indexPath.section == 0){
+        MyStoreViewController *myStore = [[MyStoreViewController alloc] init];
+        UINavigationController *nav = [[UINavigationController alloc]initWithRootViewController:myStore];
+        [ApplicationDelegate pushViewController:nav];
+
+    }else if(indexPath.section == 1){
+        AboutViewController *about = [[AboutViewController alloc] init];
+        UINavigationController *nav = [[UINavigationController alloc]initWithRootViewController:about];
+        [ApplicationDelegate pushViewController:nav];
+    }else{
+        //
+        [ApplicationDelegate setLoginViewController];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kLoginUserAccount];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kLoginUserPassword];
+    }
+}
+@end

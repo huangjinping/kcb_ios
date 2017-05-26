@@ -1,0 +1,49 @@
+//
+//  OrderManHourCell.m
+//  Merchant
+//
+//  Created by Wendy on 16/1/14.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "OrderManHourCell.h"
+
+@implementation OrderManHourCell
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    
+    if (self) {
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(22,14, 17, 17)];
+        imageView.image = [UIImage imageNamed:@"time01"];
+        [self.contentView addSubview:imageView];
+        
+        _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(imageView.right + 10, 0, APP_WIDTH-imageView.right - 110, 44)];
+        _titleLabel.text = @"小保养（机油、机滤）工时";
+        _titleLabel.font = V3_36PX_FONT;
+        _titleLabel.textColor = kColor0X949694;
+        [self.contentView addSubview:_titleLabel];
+        
+        _manHourLabel = [[UILabel alloc] initWithFrame:CGRectMake(APP_WIDTH - 100, 0, 90, 44)];
+        _manHourLabel.text = @"¥20.00";
+        _manHourLabel.font = V3_36PX_FONT;
+        _manHourLabel.textColor = kColor0XFF9418;
+        _manHourLabel.textAlignment = NSTextAlignmentRight;
+        [self.contentView addSubview:_manHourLabel];        
+        
+    }
+    
+    return self;
+}
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

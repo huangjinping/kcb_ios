@@ -1,0 +1,26 @@
+//
+//  CarTypeCell.h
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/5.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "CarInfo.h"
+
+typedef NS_ENUM(NSInteger,OpertionStyle) {
+    OpertionEditting,
+    OpertionDelete,
+    OpertionConfig
+};
+
+@interface CarTypeCell : UITableViewCell
+
+@property (nonatomic, copy)void(^commplete)(NSInteger);
+@property (nonatomic, strong)UIButton *selectV;
+@property (nonatomic, strong)NSString *hphm;                //车牌号（记录默认车）
+
+- (void)configCellWithCar:(CarInfo *)car;
+
+@end

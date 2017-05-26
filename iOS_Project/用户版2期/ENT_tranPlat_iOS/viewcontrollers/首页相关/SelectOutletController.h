@@ -1,0 +1,50 @@
+//
+//  SelectOutletController.h
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/4.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "BasicViewController.h"
+
+typedef NS_ENUM(NSInteger,SearchType){
+    SearchInDistance,
+    SearchInService,
+    SearchInPopularity
+};
+@protocol SelectItemViewSegmentDelegate <NSObject>
+
+- (void)ItemViewSegment;
+
+@end
+
+@interface SelectItemViewSegment : UIView<UISearchBarDelegate,UISearchDisplayDelegate
+>{
+
+
+
+}
+
+@property (nonatomic, weak) id<SelectItemViewSegmentDelegate,UITableViewDelegate,UITableViewDataSource> traget;
+@property (nonatomic, assign) SearchType searchType;
+@property (nonatomic, copy)void(^commplete)(SearchType);
+@property (nonatomic, strong) NSMutableArray *datas;
+
+@property (nonatomic, weak)id delegate;
+
+
++(SelectItemViewSegment *)shareWithDisplayView:(UIView *)view;
+
+@end
+
+@interface SelectOutletController : BasicViewController<UISearchBarDelegate,UISearchDisplayDelegate
+>
+
+@property (nonatomic, strong)NSString *serids;
+@property (nonatomic, strong)UISearchDisplayController *searchDisplayController;
+@property (nonatomic, strong) UISearchBar *mySearchBar;
+@property (nonatomic, strong) NSMutableArray *searchResults;
+@property (nonatomic, assign) CLLocationCoordinate2D coori2D;
+
+@end

@@ -1,0 +1,143 @@
+
+//
+//  CarPartListView.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/25.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "CarPartListView.h"
+
+@interface CarPartListView()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong)UITableView *tableView;
+
+@end
+
+static CGFloat const durition = 0.3f;
+
+@implementation CarPartListView
+{
+    UIView *_view;
+    UIButton *titleBtn;
+    
+    BOOL _res;
+}
+
++(CarPartListView *)sharePartListView{
+    CarPartListView *cv = [[CarPartListView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 75*y_6_plus)];
+
+    return cv;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        titleBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        titleBtn.backgroundColor = kWhiteColor;
+        titleBtn.frame = CGRectMake(0, 0, self.width, self.height);
+        [titleBtn setImage:[UIImage imageNamed:@"sj"] forState:UIControlStateNormal];
+        titleBtn.imageView.transform = CGAffineTransformMakeRotation(M_PI);
+        [titleBtn setTitle:@"所有品牌"];
+        [titleBtn setTitleColor:kTextGrayColor];
+        [titleBtn addActionBlock:^(id weakSender) {
+            if (_commplete) {
+                _commplete();
+            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.tableView];
+        [self addSubview:titleBtn];
+        titleBtn.titleEdgeInsets = UIEdgeInsetsMake(0, -titleBtn.imageView.width, 0, titleBtn.imageView.width);
+        titleBtn.imageEdgeInsets = UIEdgeInsetsMake(0, titleBtn.titleLabel.width, 0, -titleBtn.titleLabel.width);
+        
+        [self addLineWithFrame:CGRectMake(0, self.height-1, self.width, 1) lineColor:kLineGrayColor];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    self.tableView.height = self.dataSource.count*44;
+}
+
+- (UITableView *)tableView{
+    if (_tableView) {
+        return _tableView;
+    }
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, -300, self.width, 300)];
+    _tableView.showsVerticalScrollIndicator = NO;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    
+    return _tableView;
+}
+
+- (void)showInView:(UIView *)view{
+    NSAssert(view != nil, @"view can't be nil");
+    _view = view;
+    if (!self.dataSource.count) {
+    }else{
+        /*创建弹性动画
+         damping:阻尼，范围0-1，阻尼越接近于0，弹性效果越明显
+         velocity:弹性复位的速度
+         */
+        if (_res) {
+            titleBtn.backgroundColor = kWhiteColor;
+            [self dismissView:nil];
+        }else{
+            titleBtn.backgroundColor = [UIColor colorWithHex:0xe0e0e0];
+            [UIView animateWithDuration:durition delay:0 usingSpringWithDamping:.5f initialSpringVelocity:1.2f options:UIViewAnimationOptionCurveEaseOut animations:^{
+                self.tableView.y = self.height;
+                titleBtn.imageView.transform = CGAffineTransformIdentity;
+            } completion:^(BOOL finished) {
+                
+            }];
+        }
+        _res = !_res;
+    }
+}
+
+- (void)dismissView:(void(^)())block{
+    [UIView animateWithDuration:durition/2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        self.tableView.y = -self.tableView.height;
+        titleBtn.imageView.transform = CGAffineTransformMakeRotation(M_PI);
+    } completion:nil];
+}
+
+- (void)setDataSource:(NSMutableArray *)dataSource{
+    _dataSource = dataSource;
+    self.tableView.height = 44*y_5_SCALE*dataSource.count;
+    [self.tableView reloadData];
+}
+
+#pragma mark - UITableViewDelegate && UITableViewDataSource
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return self.dataSource.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cellId"];
+    if (!cell) {
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cellId"];
+    }
+    cell.textLabel.backgroundColor = kTextOrangeColor;
+    cell.textLabel.text = self.dataSource[indexPath.row][@"brandName"];
+    cell.textLabel.font = V3_36PX_FONT;
+    cell.textLabel.textColor = [UIColor colorWithHex:0x666666];
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [self dismissView:^{
+        if (_block) {
+            _block(nil);
+        }
+    }];
+}
+
+@end

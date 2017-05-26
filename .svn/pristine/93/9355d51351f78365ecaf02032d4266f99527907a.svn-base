@@ -1,0 +1,52 @@
+
+//
+//  OrderDeletailCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/21.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderDeletailCell.h"
+#import "UILabel+Custom.h"
+
+@implementation OrderDeletailCell
+{
+    UILabel *_meirong;
+    UILabel *_luntai;
+    UILabel *_qiche;
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _meirong = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60*y_6_plus)
+                                            text:@"保养服务"
+                                            font:V3_30PX_FONT
+                                       textColor:[UIColor colorWithHex:0x949694]];
+        _luntai = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60*y_6_plus)
+                                           text:@"保养服务"
+                                           font:V3_30PX_FONT
+                                      textColor:[UIColor colorWithHex:0x949694]];
+        _qiche = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 60*y_6_plus)
+                                          text:@"保养服务"
+                                          font:V3_30PX_FONT
+                                     textColor:[UIColor colorWithHex:0x949694]];
+        
+        [self.contentView addLineWithFrame:CGRectMake(0, 0, APP_WIDTH, 1) lineColor:kLineGrayColor];
+        [self.contentView addSubview:_meirong];
+        [self.contentView addSubview:_luntai];
+        [self.contentView addSubview:_qiche];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _meirong.origin = CGPointMake(40*x_6_plus, 28*y_6_plus);
+    _luntai.origin = CGPointMake(_meirong.x, _meirong.bottom+8*y_6_plus);
+    _qiche.origin = CGPointMake(_meirong.x, _luntai.bottom);
+}
+
+@end

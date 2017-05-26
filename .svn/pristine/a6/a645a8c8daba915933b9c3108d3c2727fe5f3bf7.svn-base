@@ -1,0 +1,74 @@
+//
+//  MineOrderSortCell.m
+//  ENT_tranPlat_iOS
+//
+//  Created by xinpenghe on 16/1/15.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "MineOrderSortCell.h"
+
+@implementation MineOrderSortCell
+{
+    UILabel *_numLabel;
+}
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _icon = [[UIImageView alloc]init];
+        _nameLabel = [[UILabel alloc]init];
+        _nameLabel.font = V3_32PX_FONT;
+        _nameLabel.textColor = [UIColor colorWithHex:0x666666];
+        _nameLabel.textAlignment = NSTextAlignmentCenter;
+        _numLabel = [[UILabel alloc]init];
+        _numLabel.text = @"2";
+        _numLabel.backgroundColor = kTextOrangeColor;
+        _numLabel.textColor = kWhiteColor;
+        _numLabel.font = V3_32PX_FONT;
+        _numLabel.textAlignment = NSTextAlignmentCenter;
+        _numLabel.layer.masksToBounds = YES;
+        _numLabel.hidden = YES;
+        
+        [self.contentView addSubview:_icon];
+        [self.contentView addSubview:_nameLabel];
+        [self.contentView addSubview:_numLabel];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    _icon.frame = CGRectMake(0, 36*y_6_plus, 95*x_6_plus, 95*y_6_plus);
+    _icon.centerX = self.contentView.boundsCenter.x;
+    _nameLabel.frame = CGRectMake(0, _icon.bottom+32*y_6_plus, self.contentView.width, 40*y_6_plus);
+    _nameLabel.centerX = self.contentView.boundsCenter.x;
+    _numLabel.frame = CGRectMake(_icon.right-34*x_6_plus, _icon.y-18*x_6_plus,50*x_6_plus,50*x_6_plus);
+    _numLabel.layer.cornerRadius = 25*x_6_plus;
+    
+    if (!_IconBadgeNumber) {
+        _numLabel.hidden = YES;
+        _numLabel.size = CGSizeMake(50*x_6_plus, 50*x_6_plus);
+        _numLabel.layer.cornerRadius = _numLabel.width/2;
+    }else if(_IconBadgeNumber <= 99){
+        _numLabel.text = [NSString stringWithFormat:@"%ld",(long)_IconBadgeNumber];
+        _numLabel.hidden = NO;
+        _numLabel.size = CGSizeMake(50*x_6_plus, 50*x_6_plus);
+        _numLabel.layer.cornerRadius = _numLabel.width/2;
+    }else{
+        _numLabel.hidden = NO;
+        _numLabel.text = @"99+";
+        _numLabel.size = CGSizeMake(75*x_6_plus, 50*x_6_plus);
+        _numLabel.layer.cornerRadius = 22*x_6_plus;
+    }
+}
+
+- (void)setIconBadgeNumber:(NSInteger)IconBadgeNumber{
+    
+    _IconBadgeNumber = IconBadgeNumber;
+    
+    [self setNeedsLayout];
+}
+
+@end

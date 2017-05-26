@@ -1,0 +1,134 @@
+//
+//  OrderCommentController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/20.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderCommentController.h"
+#import "CWStarRateView.h"
+#import "InputTextView.h"
+
+#define kCVCLeftSpace (10.0*y_6_SCALE)
+#define kCVCTopSpace (18.0*y_6_SCALE)
+#define kStarViewHeight (24*y_6_SCALE)
+#define kCommentTitleWidth (100*y_6_SCALE)
+#define kInputViewHeight (250*y_6_SCALE)
+
+// starTitleLabel
+#define kStarTitleFontSize (20*y_6_SCALE)
+
+// inputView
+#define kTextViewPlaceholder @"请输入评论详情..."
+#define kTextViewMaxLength (150*y_6_SCALE)
+
+// right barButtonItem
+#define kRightBarWidth (40*y_6_SCALE)
+#define kRightBarHeight (30*y_6_SCALE)
+
+@interface OrderCommentController ()<CWStarRateViewDelegate>
+
+@property (nonatomic, strong) CWStarRateView *starView;
+@property (nonatomic, assign) NSInteger starNumber;
+@property (nonatomic, strong) InputTextView *inputView;
+
+@end
+
+@implementation OrderCommentController
+{
+    NSInteger _score;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self createRight];
+    [self setCustomNavigationTitle:@"评论"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self creatStarCommentView];
+    [self creatAndAddInputView];
+}
+
+- (void)createRight{
+    UIButton *carTypeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    carTypeBtn.frame = CGRectMake(self->_navigationImgView.width-10*x_6_SCALE-30*x_6_SCALE, 0, 30*x_6_SCALE, 20*y_6_SCALE);
+    carTypeBtn.centerY = self->_navigationImgView.boundsCenter.y;
+    carTypeBtn.backgroundColor = [UIColor redColor];
+    [carTypeBtn setBackgroundImage:[UIImage imageNamed:@"car"] forState:UIControlStateNormal];
+    [self->_navigationImgView addSubview:carTypeBtn];
+    
+    [carTypeBtn addActionBlock:^(id weakSender) {
+        [[NetworkEngine sharedNetwork] postBody:@{@"orderId":_orderId,@"type":@"1",@"level":@(_starView.scorePercent*5),@"text":_inputView.inputView.text} apiPath:kOrderWattingForComment hasHeader:YES finish:^(ResultState state, id resObj) {
+            if (state == StateSucceed) {
+                if (_commplete) {
+                    _commplete();
+                }
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+        } failed:^(NSError *error) {
+            
+        }];
+    } forControlEvents:UIControlEventTouchUpInside];
+}
+
+#pragma mark - 提交事件
+
+-(void)commitEvent
+{
+    [self.view endEditing:YES];
+    
+    if (![_inputView.inputView.text isLegal]) {
+        [UITools alertWithMsg:@"请检查您输入的内容"];
+        return;
+    }
+    [self submitInputTextWith:_inputView.inputView.text];
+}
+
+-(void)submitInputTextWith:(NSString*)content{
+
+}
+
+
+#pragma mark -  星 评论视图
+-(void)creatStarCommentView{
+    UILabel *l = [self creatStarViewTitleWiht:CGRectMake(15*x_6_SCALE, APP_VIEW_Y+kCVCTopSpace, 100*x_6_SCALE, kStarViewHeight*y_6_SCALE)];
+    _starView = [[CWStarRateView alloc]initWithFrame:CGRectMake(110*x_6_SCALE, APP_VIEW_Y+kStarViewHeight, APP_WIDTH-140*x_6_SCALE, kStarViewHeight) numberOfStars:5];
+    _starView.centerY = l.centerY;
+    [self.view addSubview:_starView];
+}
+
+-(UILabel *)creatStarViewTitleWiht:(CGRect)frmae
+{
+    UILabel *label = [[UILabel alloc] initWithFrame:frmae];
+    label.text = @"星级评论";
+    label.textColor = kTextBlackColor;
+    label.font = [UIFont systemFontOfSize:kStarTitleFontSize];
+    [self.view addSubview:label];
+    
+    return label;
+}
+
+#pragma mark - StarViewDelegate
+- (void)starRateView:(CWStarRateView *)starRateView scroePercentDidChange:(CGFloat)newScorePercent{
+    _score = (NSInteger)newScorePercent;
+}
+
+#pragma mark - 输入视图
+
+-(void)creatAndAddInputView
+{
+    CGFloat orginY = kCVCTopSpace*2 + kStarViewHeight+APP_VIEW_Y;
+    CGFloat width = self.view.width - kCVCLeftSpace*2;
+    CGRect frame = CGRectMake(kCVCLeftSpace, orginY + 60, width, kInputViewHeight);
+    
+    _inputView = [[InputTextView alloc] initWithFrame:frame];
+    _inputView.placeholder = @"请输入您对该店的评价";
+    _inputView.textViewMaxLength = kTextViewMaxLength;
+    [self.view addSubview:_inputView];
+}
+
+@end

@@ -1,0 +1,25 @@
+//
+//  CarNkController.h
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/1/20.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "BaseTableViewController.h"
+
+@interface CarNkController : BaseTableViewController
+
+@property (nonatomic, assign) BOOL saveCarInfo;
+@property (nonatomic, strong) CarInfo *car;
+@property (nonatomic, strong) NSString *seriesId;
+@property (nonatomic, strong) NSString *pqlvalue;
+@property (nonatomic, strong) NSString *level;
+@property (nonatomic, strong) NSString *clpp1;
+@property (nonatomic, strong) NSString *icon;
+@property (nonatomic, strong) NSString *line;
+
+@property (nonatomic, assign) BOOL needHome;
+
+@end
+

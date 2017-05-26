@@ -1,0 +1,204 @@
+//
+//  OrderContentController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/2/3.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "OrderContentController.h"
+#import "OrderStateController.h"
+#import "OrderDetailController.h"
+
+@interface customView()
+
++ (customView *)shareCustomView;
+
+@property (nonatomic, copy)void(^block)(NSInteger);
+
+@end
+@implementation customView
+
++ (customView *)shareCustomView{
+    customView *cv = [[customView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 106*y_6_plus)];
+    
+    return cv;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _lBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _lBtn.frame = CGRectMake(self.width/2-204*x_6_plus, 0, 204*x_6_plus, self.height-10*y_6_plus);
+        [_lBtn setTitle:@"订单状态"];
+        _lBtn.selected = YES;
+        [_lBtn setTitleColor:kWhiteColor forState:UIControlStateSelected];
+        [_lBtn setTitleColor:[UIColor colorWithRed:192/255 green:227/255 blue:197/255 alpha:.5] forState:UIControlStateNormal];
+        _lBtn.titleLabel.font = V3_42PX_FONT;
+        
+        _rBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _rBtn.frame = CGRectMake(self.width/2, 0, 204*x_6_plus, self.height-10*y_6_plus);
+        [_rBtn setTitle:@"订单详情"];
+        [_rBtn setTitleColor:kWhiteColor forState:UIControlStateSelected];
+
+        [_rBtn setTitleColor:[UIColor colorWithRed:192/255 green:227/255 blue:197/255 alpha:.5] forState:UIControlStateNormal];
+        _rBtn.titleLabel.font = V3_42PX_FONT;
+        
+        _line = [[UIView alloc]initWithFrame:CGRectMake(_lBtn.x, _lBtn.bottom, _lBtn.width, 10*y_6_plus)];
+        _line.backgroundColor = kWhiteColor;
+        
+        __block __typeof(_lBtn) weakLBtn = _lBtn;
+        __block __typeof(_rBtn) weakRBtn = _rBtn;
+        [_lBtn addActionBlock:^(id weakSender) {
+            if (_block) {
+                _block(1);
+            }
+//            if (!weakLBtn.selected) {
+                weakLBtn.selected = YES;
+                weakRBtn.selected = NO;
+                [UIView animateWithDuration:.2f animations:^{
+                    _line.x = weakLBtn.x;
+                }];
+//            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        [_rBtn addActionBlock:^(id weakSender) {
+            if (_block) {
+                _block(2);
+            }
+//            if (weakLBtn.selected) {
+                weakLBtn.selected = NO;
+                weakRBtn.selected = YES;
+                [UIView animateWithDuration:.2f animations:^{
+                    _line.x = weakRBtn.x;
+                }];
+//            }
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        [self addSubview:_lBtn];
+        [self addSubview:_rBtn];
+        [self addSubview:_line];
+    }
+    
+    return self;
+}
+@end
+@interface OrderContentController ()<UIScrollViewDelegate>
+
+@property (nonatomic, strong)UIScrollView *scrollView;
+
+@end
+
+@implementation OrderContentController
+{
+    UIView *_leftV;
+    UIView *_rightV;
+    customView *cv;
+    
+    OrderStateController *lVC;
+    OrderDetailController *rVC;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = kWhiteColor;
+    cv = [customView shareCustomView];
+    cv.centerY = self->_navImgView.boundsCenter.y;
+    [self->_navImgView addSubview:cv];
+    [self->_navImgView bringSubviewToFront:self->_backButton];
+    
+    lVC = [[OrderStateController alloc]init];
+    rVC = [[OrderDetailController alloc]init];
+    
+    cv.block = ^(NSInteger n){
+        if (n == 1) {
+            [UIView animateWithDuration:.2f animations:^{
+                CGPoint point = self.scrollView.contentOffset;
+                self.scrollView.contentOffset = CGPointMake(0, point.y);
+            }];
+            
+            [lVC viewWillAppear:NO];
+            [rVC viewWillDisappear:NO];
+        }else{
+            [UIView animateWithDuration:.2f animations:^{
+                CGPoint point = self.scrollView.contentOffset;
+                self.scrollView.contentOffset = CGPointMake(self.scrollView.width, point.y);
+            }];
+            
+            [lVC viewWillDisappear:NO];
+            [rVC viewWillAppear:NO];
+        }
+    };
+    [self addChildViewController:lVC];
+    [self addChildViewController:rVC];
+    
+    [self.view addSubview:self.scrollView];
+    [self.navigationController.navigationBar bringSubviewToFront:self->_navImgView];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [self->_navImgView removeFromSuperview];
+}
+
+- (UIScrollView *)scrollView{
+    if (_scrollView) {
+        return _scrollView;
+    }
+    _scrollView = [[UIScrollView alloc]initWithFrame:self.view.bounds];
+    _scrollView.pagingEnabled = YES;
+    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.contentSize = CGSizeMake(APP_WIDTH*2, self.view.height);
+    _scrollView.delegate = self;
+    
+    lVC.orderNo = self.orderNo;
+    lVC.orderId = self.orderId;
+    
+    rVC.orderNo = self.orderNo;
+    rVC.orderId = self.orderId;
+//    rVC.status = self.status;
+    rVC.commplete = [self.commplete copy];
+    rVC.commplete0 = [self.commplete0 copy];
+    
+    _leftV = [[UIView alloc]initWithFrame:self.view.bounds];
+    _rightV = [[UIView alloc]initWithFrame:self.view.bounds];
+    _rightV.x = _leftV.right;
+    
+    lVC.view.frame = _leftV.bounds;
+    rVC.view.frame = _rightV.bounds;
+    
+    [_leftV addSubview:lVC.view];
+    [_rightV addSubview:rVC.view];
+    [_scrollView addSubview:_leftV];
+    [_scrollView addSubview:_rightV];
+    
+    return _scrollView;
+}
+
+#pragma mark UIScrollViewDelegate
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    CGFloat x = 0.f;
+    x = cv.lBtn.x+cv.lBtn.width*(scrollView.contentOffset.x/scrollView.width);
+    cv.line.x = x;
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    if (cv.line.x-cv.lBtn.width < cv.width/4) {
+        CGFloat k = (cv.line.x-cv.lBtn.width)/cv.lBtn.width;
+       [UIView animateWithDuration:.2f*k animations:^{
+           cv.line.x = cv.lBtn.x;
+           cv.lBtn.selected = YES;
+           cv.rBtn.selected = NO;
+       }];
+    }else{
+        CGFloat k = (cv.line.x-cv.lBtn.width)/cv.lBtn.width;
+        [UIView animateWithDuration:.2f*k animations:^{
+            cv.line.x = cv.width/2;
+            cv.lBtn.selected = NO;
+            cv.rBtn.selected = YES;
+        }];
+    }
+}
+
+@end

@@ -1,0 +1,311 @@
+//
+//  RescueViewController.m
+//  ENT_tranPlat_iOS
+//
+//  Created by Lin_LL on 16/3/2.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "RescueViewController.h"
+#import "BrandCell.h"
+#import "ChineseInclude.h"
+#import "PinYinForObjc.h"
+
+@interface RescueViewController ()<UISearchBarDelegate,UISearchDisplayDelegate
+>{
+    NSMutableArray *_searchResults;
+}
+@property (nonatomic, strong) UIView *headerView;
+@property (nonatomic, strong) UISearchBar *mySearchBar;
+@property (nonatomic, strong) UISearchDisplayController *searchDisplayController;
+@property (nonatomic, strong) NSArray *datas;
+@end
+static NSString *cellId = @"cellId";
+@implementation RescueViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    _datas=[self datasAt:_datas];
+    _searchResults=[NSMutableArray arrayWithArray:_datas];
+    self.tableView.tableHeaderView = self.headerView;
+    [self.tableView registerClass:[RescueCell class] forCellReuseIdentifier:cellId];
+    self.tableView.sectionIndexColor = [UIColor blackColor];
+   // self.tableView.frame=CGRectMake(0,64,APP_WIDTH, 980*y_6_plus);
+    self.tableView.sectionIndexBackgroundColor = kClearColor;
+    //self.tableView.scrollEnabled =NO;
+    
+    // Do any additional setup after loading the view.
+}
+- (UIView *)headerView{
+    if (_headerView) {
+        return _headerView;
+    }
+    _headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, APP_WIDTH, 580*y_6_plus)];
+    _headerView.backgroundColor=COLOR_FRAME_LINE;
+   // _mySearchBar  = [[UISearchBar alloc]initWithFrame:CGRectMake(30*x_6_plus, 27*y_6_plus, (1080-38*2)*x_6_plus, 130*y_6_plus)];
+     _mySearchBar  = [[UISearchBar alloc]initWithFrame:CGRectMake(0, 27*y_6_plus, APP_WIDTH, 130*y_6_plus)];
+   // _mySearchBar.center = _headerView.boundsCenter;
+    _mySearchBar.delegate = self;
+    [_mySearchBar setPlaceholder:@"请输入保险公司名称"];
+    // _mySearchBar.searchBarStyle = UISearchBarStyleMinimal;
+    UIView *baoxianView=[[UIView alloc]initWithFrame:CGRectMake(0, (130+27*2)*y_6_plus, APP_WIDTH, 360*y_6_plus)];
+    baoxianView.backgroundColor =[UIColor whiteColor];
+    [_headerView addSubview:baoxianView];
+    UILabel *lanel=[[UILabel alloc]initWithFrame:CGRectMake(APP_WIDTH/3, 0, 1*x_6_plus,360*y_6_plus)];
+    lanel.backgroundColor=COLOR_FRAME_LINE;
+    [baoxianView addSubview:lanel];
+    lanel=[[UILabel alloc]initWithFrame:CGRectMake(APP_WIDTH/3*2, 0, 1*x_6_plus,346*y_6_plus)];
+    lanel.backgroundColor=COLOR_FRAME_LINE;
+    [baoxianView addSubview:lanel];
+    
+    UIImageView *view =[[UIImageView alloc]initWithFrame:CGRectMake(0, 63*y_6_plus, 240*x_6_plus,98*y_6_plus)];
+    view.centerX=360/2*y_6_plus;
+    view.image=[UIImage imageNamed:@"中国人民保险"];
+    UILabel *tellabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 180*y_6_plus, 150*x_6_plus,50*y_6_plus)];
+    tellabel.text=@"95518";
+    tellabel.font=WY_FONT_SIZE(42);
+    tellabel.textColor=COLOR_FONT_INFO_SHOW;
+    view.centerX=360/2*y_6_plus;
+    tellabel.centerX=360/2*y_6_plus;
+    [baoxianView addSubview:tellabel];
+    [baoxianView addSubview:view];
+    view =[[UIImageView alloc]initWithFrame:CGRectMake(0, 63*y_6_plus, 200*x_6_plus,98*y_6_plus)];
+    view.centerX=1080/2*y_6_plus;
+    view.image=[UIImage imageNamed:@"太平洋保险"];
+    tellabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 180*y_6_plus, 150*x_6_plus,50*y_6_plus)];
+    tellabel.text=@"95500";
+    tellabel.font=WY_FONT_SIZE(42);
+    tellabel.textColor=COLOR_FONT_INFO_SHOW;
+    view.centerX=1080/2*y_6_plus;
+    tellabel.centerX=view.centerX;
+    [baoxianView addSubview:tellabel];
+    [baoxianView addSubview:view];
+    view =[[UIImageView alloc]initWithFrame:CGRectMake(0, 63*y_6_plus, 240*x_6_plus,98*y_6_plus)];
+    view.centerX=(1080-360/2)*y_6_plus;
+    view.image=[UIImage imageNamed:@"中国平安保险"];
+    tellabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 180*y_6_plus, 150*x_6_plus,50*y_6_plus)];
+    tellabel.text=@"95511";
+    tellabel.font=WY_FONT_SIZE(42);
+    tellabel.textColor=COLOR_FONT_INFO_SHOW;
+    view.centerX=(1080-360/2)*y_6_plus;
+    tellabel.centerX=view.centerX;
+    [baoxianView addSubview:tellabel];
+    [baoxianView addSubview:view];
+     ZKButton*  XCButton=[ZKButton blockButtonWithFrame:BBRectMake(0,250,240, 60)  type:UIButtonTypeCustom title:@"拨打电话" backgroundImage:nil andBlock:^(ZKButton *button) {
+        
+        [UITools alertWithMsg:@"是否拨打救援服务热线 " viewController:self confirmAction:^{
+             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://95518"]]];
+        } cancelAction:nil];
+        
+    }];
+    
+    XCButton.layer.borderWidth=1;
+    XCButton.centerX=360/2*y_6_plus;
+    XCButton.layer.cornerRadius = 10*y_6_plus;
+    XCButton.layer.masksToBounds = YES;
+    XCButton.titleLabel.font=(WY_FONT_SIZE(36));
+    [XCButton setTitleColor:COLOR_FONT_NOMAL];
+    XCButton.layer.borderColor = COLOR_FONT_NOTICE.CGColor;
+    [baoxianView addSubview:XCButton];
+    XCButton=[ZKButton blockButtonWithFrame:BBRectMake(0,250,240, 60)  type:UIButtonTypeCustom title:@"拨打电话" backgroundImage:nil andBlock:^(ZKButton *button) {
+        
+       [UITools alertWithMsg:@"是否拨打救援服务热线 " viewController:self confirmAction:^{
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://95500"]]];
+        } cancelAction:nil];
+        
+    }];
+    XCButton.layer.borderWidth=1;
+    XCButton.layer.cornerRadius = 10*y_6_plus;
+    XCButton.layer.masksToBounds = YES;
+    XCButton.centerX=1080/2*y_6_plus;
+    XCButton.titleLabel.font=(WY_FONT_SIZE(36));
+    [XCButton setTitleColor:COLOR_FONT_NOMAL];
+    XCButton.layer.borderColor = COLOR_FONT_NOTICE.CGColor;
+    [baoxianView addSubview:XCButton];
+    XCButton=[ZKButton blockButtonWithFrame:BBRectMake(0,250,240, 60)  type:UIButtonTypeCustom title:@"拨打电话" backgroundImage:nil andBlock:^(ZKButton *button) {
+        
+        [UITools alertWithMsg:@"是否拨打救援服务热线 " viewController:self confirmAction:^{
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://95511"]]];
+        } cancelAction:nil];
+        
+    }];
+    
+    XCButton.layer.borderWidth=1;
+    XCButton.layer.cornerRadius = 10*y_6_plus;
+    XCButton.layer.masksToBounds = YES;
+    XCButton.centerX=(1080-360/2)*y_6_plus;
+    XCButton.titleLabel.font=(WY_FONT_SIZE(36));
+    [XCButton setTitleColor:COLOR_FONT_NOMAL];
+    XCButton.layer.borderColor = COLOR_FONT_NOTICE.CGColor;
+    [baoxianView addSubview:XCButton];
+
+    
+    
+    
+    
+
+    [_headerView addSubview:_mySearchBar];
+    
+    
+    return _headerView;
+}
+-(NSArray *)datasAt:(NSArray *)array{
+    if (array) {
+        return array;
+    }
+    NSMutableDictionary *dic1=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic1 setObject:@"新华保险" forKey:@"name"];
+    [dic1 setObject:@"95567" forKey:@"tel"];
+    NSMutableDictionary *dic2=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic2 setObject:@"中国太平" forKey:@"name"];
+    [dic2 setObject:@"95589" forKey:@"tel"];
+    NSMutableDictionary *dic3=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic3 setObject:@"阳光保险" forKey:@"name"];
+    [dic3 setObject:@"95510" forKey:@"tel"];
+    NSMutableDictionary *dic4=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic4 setObject:@"大地保险" forKey:@"name"];
+    [dic4 setObject:@"95590" forKey:@"tel"];
+    NSMutableDictionary *dic5=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic5 setObject:@"中华保险" forKey:@"name"];
+    [dic5 setObject:@"95585" forKey:@"tel"];
+    NSMutableDictionary *dic6=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic6 setObject:@"天安保险" forKey:@"name"];
+    [dic6 setObject:@"95505" forKey:@"tel"];
+    NSMutableDictionary *dic7=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic7 setObject:@"永安保险" forKey:@"name"];
+    [dic7 setObject:@"95502" forKey:@"tel"];
+    NSMutableDictionary *dic8=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic8 setObject:@"安邦保险" forKey:@"name"];
+    [dic8 setObject:@"95569" forKey:@"tel"];
+    NSMutableDictionary *dic9=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic9 setObject:@"华安保险" forKey:@"name"];
+    [dic9 setObject:@"95556" forKey:@"tel"];
+    NSMutableDictionary *dic10=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic10 setObject:@"永诚保险" forKey:@"name"];
+    [dic10 setObject:@"95552" forKey:@"tel"];
+    NSMutableDictionary *dic11=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic11 setObject:@"国寿保险" forKey:@"name"];
+    [dic11 setObject:@"95519" forKey:@"tel"];
+    NSMutableDictionary *dic12=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic12 setObject:@"华泰保险" forKey:@"name"];
+    [dic12 setObject:@"95509" forKey:@"tel"];
+    NSMutableDictionary *dic13=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic13 setObject:@"中银保险" forKey:@"name"];
+    [dic13 setObject:@"95566" forKey:@"tel"];
+    NSMutableDictionary *dic14=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic14 setObject:@"民安保险" forKey:@"name"];
+    [dic14 setObject:@"95506" forKey:@"tel"];
+    NSMutableDictionary *dic15=[[NSMutableDictionary alloc]initWithCapacity:0];
+    [dic15 setObject:@"长安责任保险" forKey:@"name"];
+    [dic15 setObject:@"95592" forKey:@"tel"];
+    array=[NSArray arrayWithObjects:dic1,dic2,dic3,dic4,dic5,dic6,dic7,dic8,dic9,dic10,dic11,dic12,dic13,dic14,dic15, nil];
+    return array;
+
+}
+#pragma UISearchDisplayDelegate
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    _searchResults = [[NSMutableArray alloc]init];
+    if (searchBar.text.length>0&&![ChineseInclude isIncludeChineseInString:_mySearchBar.text]) {
+        for (int i=0; i<_datas.count; i++) {
+            if ([ChineseInclude isIncludeChineseInString:_datas[i][@"name"]]) {
+                NSString *tempPinYinStr = [PinYinForObjc chineseConvertToPinYin:_datas[i][@"name"]];
+                NSRange titleResult=[tempPinYinStr rangeOfString:_mySearchBar.text options:NSCaseInsensitiveSearch];
+                if (titleResult.length>0) {
+                    [_searchResults addObject:_datas[i]];
+                }
+                NSString *tempPinYinHeadStr = [PinYinForObjc chineseConvertToPinYinHead:_datas[i][@"name"]];
+                NSRange titleHeadResult=[tempPinYinHeadStr rangeOfString:_mySearchBar.text options:NSCaseInsensitiveSearch];
+                if (titleHeadResult.length>0) {
+                    [_searchResults addObject:_datas[i]];
+                }
+            }
+            else {
+                NSRange titleResult=[_datas[i][@"name"] rangeOfString:_mySearchBar.text options:NSCaseInsensitiveSearch];
+                if (titleResult.length>0) {
+                    [_searchResults addObject:_datas[i]];
+                }
+            }
+        }
+    } else if (_mySearchBar.text.length>0&&[ChineseInclude isIncludeChineseInString:_mySearchBar.text]) {
+        for (NSDictionary *dic in _datas) {
+            NSString *tempStr=dic[@"name"];
+            NSRange titleResult=[tempStr rangeOfString:_mySearchBar.text options:NSCaseInsensitiveSearch];
+            if (titleResult.length>0) {
+                [_searchResults addObject:dic];
+                
+            }
+        }
+    }
+    if(_mySearchBar.text.length<=0){
+        _searchResults=[NSMutableArray arrayWithArray:_datas];
+    }
+    [self.tableView reloadData];
+
+    
+}
+#pragma mark UITableViewDelegate && UITableViewDataSource
+
+//- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+//    return [[_sectionnameCitysDict allKeys] count];
+//}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 0*y_6_SCALE;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    
+    return _searchResults.count;
+}
+
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 140*y_6_plus;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    RescueCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+    if (!cell) {
+        cell = [[RescueCell alloc]init];
+    }
+        NSDictionary *dic = _searchResults[indexPath.row];
+    
+        cell.contentLabel.text = dic[@"name"];
+        cell.telLabel.text = dic[@"tel"];
+        cell.telicon.image=[UIImage imageNamed:@"电话图标"];
+        cell.icon.image=[UIImage imageNamed:@"箭头图标"];
+    
+  
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    NSDictionary *dic = _datas[indexPath.row];
+    NSString *tel=dic[@"tel"];
+    [UITools alertWithMsg:@"是否拨打救援服务热线 " viewController:self confirmAction:^{
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",tel]]];
+    } cancelAction:nil];
+
+  //  cell.telLabel.text = dic[@"tel"];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:YES];
+    [self setCustomNavigationTitle:@"救援服务热线"];
+    
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,19 @@
+//
+//  MapViewController.h
+//  Merchant
+//
+//  Created by Wendy on 16/1/20.
+//  Copyright © 2016年 tranPlat. All rights reserved.
+//
+
+#import "BaseViewController.h"
+
+#import <MAMapKit/MAMapKit.h>
+#import <AMapSearchKit/AMapSearchKit.h>
+#import "APIKey.h"
+
+@interface MapViewController : BaseViewController<MAMapViewDelegate, AMapSearchDelegate>
+@property (nonatomic, strong) MAMapView *mapView;
+@property (nonatomic, strong) AMapSearchAPI *search;
+@property (nonatomic, strong) CLLocationManager *locationManager;
+@end

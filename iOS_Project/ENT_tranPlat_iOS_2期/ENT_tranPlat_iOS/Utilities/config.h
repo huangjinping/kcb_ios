@@ -1,0 +1,197 @@
+//
+//  config.h
+//  ENT_tranPlat_iOS
+//
+//  Created by yanyan on 14-7-14.
+//  Copyright (c) 2014年 ___ENT___. All rights reserved.
+//
+
+#ifndef ENT_tranPlat_iOS_config_h
+#define ENT_tranPlat_iOS_config_h
+
+
+
+
+
+#define USE_COUNTLY     0
+
+
+
+
+#ifdef ENT_DEBUG
+#define ENTLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define ENTLog(...)
+#endif
+
+#define ENT_DEBUG       0
+
+
+
+#define APP_DELEGATE ((AppDelegate*)[UIApplication sharedApplication].delegate)
+
+#define iPhone4     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 960), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhone5     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 1136), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhone6     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(750, 1334), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhone6_PLUS     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1242, 2208), [[UIScreen mainScreen] currentMode].size) : NO)
+
+
+#define iOS6  (([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0)? 1:0)
+#define iOS7    (([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0)? 1:0)
+#define iOS8    (([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)? 1:0)
+
+
+//********************************统计分析event********************************
+
+
+//********************************颜色********************************
+#define COLOR_BUTTON_BLUE           COLOR_NAV
+#define COLOR_BUTTON_FRAME          ([UIHelper getColor:@"#39944a"])
+#define COLOR_VIEW_CONTROLLER_BG    [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1]
+#define COLOR_CELL_NUM_LEBEL_TEXT   [UIColor colorWithRed:160/255.0 green:160/255.0 blue:160/255.0 alpha:0.25]
+#define COLOR_BUTTON_YELLOW         [UIColor colorWithRed:255/255.0 green:141/255.0 blue:27/255.0 alpha:1]
+#define COLOR_NAV                   ([UIHelper getColor:@"#39b44a"])
+
+
+
+#define COLOR_FONT_NOMAL            ([UIHelper getColor:@"#333333"])
+#define FONT_NOMAL                  (SYS_FONT_SIZE(30))
+
+#define COLOR_FONT_NOTICE           ([UIHelper getColor:@"#999999"])
+#define FONT_NOTICE                 (SYS_FONT_SIZE(24))
+
+#define COLOR_LINK                  ([UIHelper getColor:@"#288df0"])
+#define COLOR_FRAME_LINE            ([UIHelper getColor:@"#e5e5e5"])
+
+#define COLOR_FONT_INFO_SHOW           ([UIHelper getColor:@"#666666"])
+
+//********************************URL********************************
+#define NET_ADDR_CMS_956122             @"cms.956122.com"
+#define NET_ADDR_BUSS_956122             @"buss.956122.com"
+#define NET_QI_YE_956122                @"qiye.956122.com"
+
+#define SERVER_BACK_WITHOUT            @"server_back_without"//打标记，标记为该字段服务器未返回
+
+
+
+//********************************路径********************************
+#define LAUNCH_IMG_LOCAL_PATH     [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Caches"] stringByAppendingPathComponent:@"laucnImages.png"]
+
+#define GUIDE_IMG_LOCAL_PATH     [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Caches"] stringByAppendingPathComponent:@"guide.png"]
+
+
+#define LOCAL_PATH_CACHES         [[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Caches"]
+
+
+
+//********************************notification name********************************
+#define NOTIFICATION_CITY_SET_CHANGEDUSE           @"usecity_set_changed"     //城市设置有变动通知二手车
+#define NOTIFICATION_CITY_SET_CHANGEDBX           @"BXcity_set_changed"     //BX城市设置有变动通知
+
+
+#define NOTIFICATION_CITY_SET_CHANGED           @"city_set_changed"     //城市设置有变动通知
+#define NOTIFICATION_APP_UPDATE                 @"app_update"           //软件更新net回调通知
+#define NOTIFICATION_WX_CALL_BACK               @"wx_call_back"         //微信调起本应用通知
+#define NOTIFICATION_FINISH_DOWNLOAD_PHOTO      @"finish_download_photo"//完成下载回调通知
+#define NOTIFICATION_PUSH_REGIST_FINISHED       @"push_regist_finished" //推送注册完成通知
+#define NOTIFICATION_FETCH_MESSAGES_FINISHED    @"fetch_messages_finished"//完成获取消息\通知
+#define NOTIFICATION_PUSH_LAUNCH_AD_PAGE        @"push_launch_ad_page"//启动页广告响应--进入广告页
+
+
+//********************************数据库********************************/
+#define ACTIVE_USER_YES             @"active"
+#define ACTIVE_USER_NO              @"is_not_active"
+
+
+//*************************************UI SIZE*************************/
+#define APP_VIEW_Y           (([[[UIDevice currentDevice] systemVersion] versionStringConvertToInt] >= 700)? (20.0 + 44): (0.0))
+#define APP_Y         (([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0)? (20.0):0.0)
+#define APP_7   [[[UIDevice currentDevice] systemVersion] floatValue] 
+
+#define screenSize [[UIScreen mainScreen] bounds].size
+#define APP_X                   0
+#define APP_WIDTH               [[UIScreen mainScreen] applicationFrame].size.width
+#define APP_HEIGHT              [[UIScreen mainScreen] applicationFrame].size.height
+#define APP_STATUS_BAR_HEIGHT   20
+//#define SCREEN_HEIGHT       [[UIScreen mainScreen] bounds].size.height
+#define APP_NAV_HEIGHT          44
+#define APP_TAB_HEIGHT          49
+
+#define x_5_SCALE       ([[UIScreen mainScreen] bounds].size.width/320)
+#define y_5_SCALE       ([[UIScreen mainScreen] bounds].size.height/568)
+#define x_6_SCALE       ([[UIScreen mainScreen] bounds].size.width/375)
+#define y_6_SCALE       ([[UIScreen mainScreen] bounds].size.height/667)
+#define FONT_SIZE(a,b)    [UIFont systemFontOfSize:(a)*b]
+
+#define PX_X_SCALE                    ([[UIScreen mainScreen] bounds].size.width/640)
+#define PX_Y_SCALE                    ([[UIScreen mainScreen] bounds].size.height/960)
+#define BGRectMake(a, b, c, d)      CGRectMake((a)*PX_X_SCALE, (b)*PX_Y_SCALE, (c)*PX_X_SCALE, (d)*PX_Y_SCALE)
+#define LGRectMake(a, b, c, d)      CGRectMake((a)*PX_X_SCALE, (b)*PX_Y_SCALE, (c)*PX_X_SCALE, (d)*PX_X_SCALE)
+#define QGRectMake(a, b, c, d)      CGRectMake((a), (b)*PX_Y_SCALE, (c), (d)*PX_X_SCALE)
+#define YYSizeMake(a, b)            CGSizeMake((a)*PX_X_SCALE, (b)*PX_X_SCALE)
+#define APP_PX_Height               ([[UIScreen mainScreen] applicationFrame].size.height/PX_Y_SCALE)
+#define APP_PX_WIDTH               ([[UIScreen mainScreen] applicationFrame].size.width/PX_X_SCALE)
+//#define PX_SCALE                    (1/[[UIScreen mainScreen] scale])
+#define SYS_FONT_SIZE(a)            [UIFont systemFontOfSize:(a)*PX_X_SCALE]//(a*PX_SCALE)
+#define BOLD_FONT_SIZE(a)           [UIFont boldSystemFontOfSize:(a)*PX_X_SCALE]//(a*PX_SCALE)
+#define ITALIC_FONT_SIZE(a)         [UIFont italicSystemFontOfSize:(a)*PX_X_SCALE]//(a*PX_SCALE)
+
+
+
+#define DriHeight               (300*210/457) //广告View高度
+
+#define SEGMENT_BUTTON_VIEW_HEIGHT      35
+
+//cell
+#define CELL_ID_PEECANCY_RECORD           @"peccancyRCell"
+
+//firstPage
+#define FIRST_PAGE_TF_WIDTH                     400
+#define FIRST_PAGE_TF_HEIGHT                    50
+#define FIRST_PAGE_TF_SPACE                     30
+#define FIRST_PAGE_TF_LINE_HEIGHT               (FIRST_PAGE_TF_SPACE + FIRST_PAGE_TF_HEIGHT + FIRST_PAGE_TF_SPACE)
+#define FIRST_PAGE_BUTTON_HEIGHT                40
+
+#define PW_SHOW_BUTTON_WIDTH                    35
+
+
+
+//*********************************keys**********************************/
+//key USERDEFAULT
+#define KEY_CITY_NAME_IN_USERDEFAULT         @"city_name"
+#define KEY_CITY_CODE_IN_USERDEFAULT         @"city_code"
+
+
+#define KEY_CITY_NAME_IN_USERDEFAULTBX         @"city_nameBX"
+#define KEY_CITY_CODE_IN_USERDEFAULTBX        @"city_codeBX"
+
+#define KEY_CITY_NAME_IN_USERDEFAULTUSE         @"usedcity_name"
+#define KEY_CITY_CODE_IN_USERDEFAULTUSE         @"usedcity_code"
+
+
+#define KEY_PHOTO_DICT_IN_USERDEFAULT        @"photo_key"
+#define KEY_LAUNCH_IMAGE_AD_URL              @"launch_image_advertisement_url"
+
+//#define KEY_CITY_NAME_IN_USERDEFAULTE         @"city_namee"
+//#define KEY_CITY_CODE_IN_USERDEFAULTE         @"city_codee"
+#define kAlphaNum @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+#define KEY_YUN_NAN_CHU_LI                  @"yun_nan_chu_li_guo"
+
+//key net callback
+#define KEY_REQ_CODE    @"req_code"
+#define KEY_REQ_MSG     @"req_msg"
+
+//key dict in notify
+#define KEY_BPUSH_USER_ID               @"bpush_userid"
+#define KEY_BPUSH_CHANNEL_ID            @"bpush_channelid"
+
+//支付宝
+//私钥
+#define PartnerPrivatekey  @"MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKS6h9evp0u4waBi+hCAzxBd89JUzf+RRqnAHN5tHQetKHHAIQaYm7XMd6O7s++9hlSGXBt7RCo5keJkPcQMkjEhY5Z/GUsAu6NkkijHQS3wWcGcdQqqn+ROTTmhVU82bzL5PloitSOvrftpo3Fp7L6dFxg1Oltn5l6JZw9zcjBJAgMBAAECgYBxTU9kHhBOt+yOOaXQNhi2JDkxYV0zPKRC272/i4NdJU/dNY5BsDPhjpp3xwJTkqNTffraeCWBeYmLEvGc6BygjZBBKnOU+IeUvQrM63bO2ke0z3fg7QpeGbKfu0E83FsY6H0MRF9CpBoJrbUYMaqIXd+4HYmGrV/DSY0MUr4zpQJBANcLO2DKh/sOfPqPrsuSlXsYTMsgY/Oxqo3tx3/J7U7ozQ1VgIR8qhKYv2iB19MbIoBrEVMyNU1ENmlc+WvlC48CQQDEGhuqq3jM6mSI9rn8Y0VZOc5TfNieL0v21Pw1m/E3BD8/rAKv+2gnXe3VAtStNSd1or3TGnObtnqOeYMZYvqnAkEAy3YGFTsq01/O4ebGNDgZlGDWb63SxASKYUTjZ8Xu8KUVNZN7SF8HLxc0qrWHNWbMCwLCXpv3kIaEkMX1+563gwJBAKjdGoni0kkSZbQTUaBmE2d8AZGe5iGA9Nb+HJhFSndnrtczVbUYtl1/4rcUkvL73JjNpMxN8NNbVTmupReNRe0CQH7EXXqfNNQvh6Y1UDSbPqoe9jiAjbDdj8WGhnePDIVGSq876bjAu5tfG9TWqhghlmt3+aUzm7Q6cQLxKe/6Mec="
+
+//合作身份者id，以2088开头的16位纯数字
+#define PartnerID @"2088121008789202"
+//收款支付宝账号
+#define SellerID  @"kcbpay@956122.com"
+
+#endif

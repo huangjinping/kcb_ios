@@ -1,0 +1,128 @@
+//
+//  LocationManager.m
+//  ENT_tranPlat_iOS
+//
+//  Created by 辛鹏贺 on 16/2/19.
+//  Copyright © 2016年 ___ENT___. All rights reserved.
+//
+
+#import "LocationManager.h"
+#import <CoreLocation/CoreLocation.h>
+
+typedef void(^ReGeocodeSearchDone)(AMapReGeocode *,AMapGeoPoint *);
+
+@interface LocationManager()<AMapSearchDelegate,MAMapViewDelegate>
+
+@property (nonatomic,strong) AMapSearchAPI              *search;
+@property (nonatomic,strong) MAMapView                  *mapView;
+@property (nonatomic,copy) ReGeocodeSearchDone        reGeocodeDone;
+@property (nonatomic,assign) CLLocationCoordinate2D     coorinate;
+@property (nonatomic,strong) NSString                   *address;
+
+
+@property (nonatomic,assign) BOOL               startGetloction;
+@property (nonatomic,assign) BOOL               status;         //设置超时，10s
+
+@end
+
+@implementation LocationManager
+{
+    AMapReGeocodeSearchRequest *_regeoRequest;
+}
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [AMapSearchServices sharedServices].apiKey = MAMapAPIKEY;
+        _search = [[AMapSearchAPI alloc]init];
+        _search.delegate = self;
+        _mapView = [[MAMapView alloc]init];
+        _mapView.delegate = self;
+        _mapView.showsUserLocation = YES;
+        _startGetloction = YES;
+        _status = NO;
+    }
+    
+    return self;
+}
+
+#pragma mark ------------------------------------
+//只在程序第一次加载的时候会定位一次(省电)
+
++(LocationManager *)shareLocationManager{
+    static id _manager = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        _manager = [[LocationManager alloc]init];
+    });
+    
+    return _manager;
+}
+
+-(void)getCurrentCitySearchFinishDone:(SearchFininshDone)finishBlock searchFailedDone:(SearchFailedDone)failedBlock{
+//    dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC*10);
+//    dispatch_after(time, dispatch_get_main_queue(), ^{
+//        if (!_status) {
+//            finishBlock(@"、、、、",CLLocationCoordinate2DMake(0, 0));
+//        }
+//        _status = YES;
+//    });
+    _finishBlock = [finishBlock copy];
+    _failedBlcok = [failedBlock copy];
+}
+
+- (void)stopLocation
+{
+    self.mapView.showsUserLocation = NO;
+}
+
+-(void)reReoCodeSearch{
+    [self initReGeocodeSearchRequest];
+    [self AMapReGoecodeSearch:_regeoRequest reGeocodeSearchDone:^(AMapReGeocode *geocode, AMapGeoPoint *GeoPoint) {
+        NSString *city = [geocode.addressComponent.city isLegal] ? geocode.addressComponent.city : geocode.addressComponent.province;
+        NSString *code = geocode.addressComponent.citycode;
+        if (_finishBlock) {
+            _finishBlock(city,code,_coorinate);
+        }
+    }];
+}
+
+-(void)initReGeocodeSearchRequest{
+    _regeoRequest = [[AMapReGeocodeSearchRequest alloc] init];
+//    _regeoRequest.searchType = AMapSearchType_ReGeocode;
+    _regeoRequest.location = [AMapGeoPoint locationWithLatitude:self.coorinate.latitude longitude:self.coorinate.longitude];
+    _regeoRequest.radius = 100;
+}
+
+-(void)AMapReGoecodeSearch:(AMapReGeocodeSearchRequest *)request reGeocodeSearchDone:(ReGeocodeSearchDone)reGeocodeDone{
+    [self.search AMapReGoecodeSearch:request];
+    self.reGeocodeDone = reGeocodeDone;
+}
+
+#pragma mark MAMapViewDelegate
+
+-(void)mapView:(MAMapView *)mapView didUpdateUserLocation:(MAUserLocation *)userLocation{
+    _coorinate = userLocation.coordinate;
+    [self reReoCodeSearch];
+}
+
+-(void)mapView:(MAMapView *)mapView didFailToLocateUserWithError:(NSError *)error{
+    if (_failedBlcok) {
+        _failedBlcok();
+    }
+}
+
+#pragma mark AMapSearchDelegate 逆向地理编码回调函数
+
+-(void)onReGeocodeSearchDone:(AMapReGeocodeSearchRequest *)request response:(AMapReGeocodeSearchResponse *)response{
+    if (_status) {
+        return;
+    }
+    if (response.regeocode) {
+        self.reGeocodeDone(response.regeocode,request.location);
+        self.mapView.showsUserLocation = NO;
+        _status = YES;
+        [self stopLocation];
+    }
+}
+
+@end
